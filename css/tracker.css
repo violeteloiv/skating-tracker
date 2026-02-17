@@ -1,0 +1,256 @@
+/* ============================================================
+   tracker.css — tracker form, history, benchmarks, charts
+   ============================================================ */
+
+/* ── Cards ── */
+.tracker-card {
+  background: rgba(17,34,64,0.7);
+  border: 1px solid rgba(168,216,234,0.1);
+  border-radius: 6px;
+  padding: 22px;
+  transition: border-color 0.3s;
+}
+.tracker-card:hover { border-color: rgba(168,216,234,0.2); }
+
+.tracker-card-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ice-deep);
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(168,216,234,0.1);
+}
+
+/* ── Form fields ── */
+.tracker-field { margin-bottom: 14px; }
+
+.tracker-field label {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.tracker-field input[type="number"],
+.tracker-field input[type="date"],
+.tracker-field select,
+.tracker-field textarea {
+  width: 100%;
+  background: rgba(11,26,46,0.8);
+  border: 1px solid rgba(168,216,234,0.15);
+  border-radius: 4px;
+  padding: 9px 12px;
+  color: var(--frost);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.tracker-field input[type="number"]:focus,
+.tracker-field input[type="date"]:focus,
+.tracker-field select:focus,
+.tracker-field textarea:focus {
+  border-color: var(--ice-deep);
+}
+
+.tracker-field input[type="range"] {
+  width: calc(100% - 36px);
+  accent-color: var(--ice-deep);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.tracker-field textarea {
+  resize: vertical;
+  min-height: 70px;
+  line-height: 1.5;
+}
+
+.range-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--ice-deep);
+  margin-left: 10px;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* ── Buttons ── */
+.save-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: rgba(168,216,234,0.12);
+  border: 1px solid rgba(168,216,234,0.35);
+  color: var(--ice);
+  padding: 12px 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.save-btn:hover { background: rgba(168,216,234,0.22); border-color: var(--ice-deep); }
+
+.clear-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid rgba(168,216,234,0.15);
+  color: var(--muted);
+  padding: 11px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.clear-btn:hover { color: var(--frost); border-color: rgba(168,216,234,0.3); }
+
+/* ── History entries ── */
+.history-entry {
+  background: rgba(17,34,64,0.6);
+  border: 1px solid rgba(168,216,234,0.1);
+  border-radius: 6px;
+  padding: 18px 22px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.history-entry:hover { border-color: rgba(168,216,234,0.22); }
+
+.history-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.history-entry-date {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--ice-deep);
+}
+
+.history-entry-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 2px;
+  background: rgba(168,216,234,0.08);
+  color: var(--silver);
+  border: 1px solid rgba(168,216,234,0.15);
+}
+
+.history-entry-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.history-stat {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.history-stat span { color: var(--silver); }
+
+.history-notes {
+  margin-top: 10px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+  border-top: 1px solid rgba(168,216,234,0.07);
+  padding-top: 10px;
+  line-height: 1.6;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: rgba(192,80,80,0.4);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+.delete-btn:hover { color: #e08080; }
+
+/* ── Personal best cards ── */
+.pb-card {
+  background: rgba(17,34,64,0.6);
+  border: 1px solid rgba(168,216,234,0.1);
+  border-radius: 6px;
+  padding: 18px;
+  text-align: center;
+}
+.pb-card-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.pb-card-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.pb-card-unit {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── Chart shared styles ── */
+.chart-val-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--silver);
+  margin-bottom: 2px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 12px;
+}
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.chart-legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  #tracker-section .tracker-card { grid-column: 1/-1 !important; }
+  #pb-grid { grid-template-columns: repeat(2,1fr) !important; }
+}

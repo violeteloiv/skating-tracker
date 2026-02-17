@@ -1,0 +1,312 @@
+/* ============================================================
+   plan.css — workout plan: overview, months, weeks, exercises
+   ============================================================ */
+
+/* ── Overview strip ── */
+.overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(168,216,234,0.15);
+  border: 1px solid rgba(168,216,234,0.15);
+  border-radius: 4px;
+  margin: 0 0 56px;
+  overflow: hidden;
+}
+
+.overview-item {
+  background: rgba(11,26,46,0.8);
+  padding: 24px 20px;
+  text-align: center;
+  transition: background 0.3s;
+}
+
+.overview-item:hover { background: rgba(168,216,234,0.06); }
+
+.overview-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  letter-spacing: 2px;
+  color: var(--ice-deep);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.overview-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Month navigation ── */
+.month-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgba(168,216,234,0.1);
+  padding-bottom: 0;
+}
+
+/* ── Month panels ── */
+.month-panel { display: none; animation: fadeUp 0.4s ease; }
+.month-panel.active { display: block; }
+
+.month-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  margin-bottom: 40px;
+  padding: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.07);
+  position: relative;
+  overflow: hidden;
+}
+
+.month-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--month-gradient);
+  opacity: 0.07;
+}
+
+.month-num-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 100px;
+  line-height: 0.85;
+  letter-spacing: 2px;
+  color: var(--month-color);
+  opacity: 0.25;
+  flex-shrink: 0;
+}
+
+.month-info { position: relative; z-index: 1; }
+
+.month-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 3px;
+  color: var(--month-color);
+  margin-bottom: 8px;
+}
+
+.month-theme {
+  font-size: 18px;
+  font-style: italic;
+  color: var(--silver);
+  font-weight: 300;
+  margin-bottom: 12px;
+}
+
+.month-focus {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.focus-tag {
+  display: inline-block;
+  background: rgba(168,216,234,0.08);
+  border: 1px solid rgba(168,216,234,0.15);
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin: 2px;
+  color: var(--ice);
+}
+
+/* ── Equipment callout ── */
+.equipment-box {
+  background: rgba(74,144,184,0.06);
+  border: 1px solid rgba(74,144,184,0.2);
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 40px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.equip-icon { font-size: 28px; flex-shrink: 0; }
+
+.equip-text h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ice-deep);
+  margin-bottom: 8px;
+}
+
+.equip-text p { font-size: 14px; color: var(--silver); line-height: 1.6; font-style: italic; }
+
+/* ── Week grid ── */
+.weeks-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.week-card {
+  background: rgba(17,34,64,0.6);
+  border: 1px solid rgba(168,216,234,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+}
+
+.week-card:hover {
+  border-color: rgba(168,216,234,0.25);
+  transform: translateY(-2px);
+}
+
+.week-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(168,216,234,0.05);
+  border-bottom: 1px solid rgba(168,216,234,0.08);
+}
+
+.week-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--month-color);
+  flex-shrink: 0;
+}
+
+.week-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+
+.week-body { padding: 20px; }
+
+/* ── Day rows ── */
+.day-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(168,216,234,0.06);
+  align-items: start;
+}
+
+.day-row:last-child { border-bottom: none; }
+
+.day-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--month-color);
+  padding-top: 1px;
+}
+
+.day-content { font-size: 14px; color: var(--silver); line-height: 1.5; font-weight: 300; }
+.day-content strong { color: var(--frost); font-weight: 600; font-style: italic; }
+.rest-day .day-content { color: var(--muted); font-style: italic; }
+
+/* ── Exercise cards ── */
+.section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(168,216,234,0.1);
+}
+
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.exercise-card {
+  background: rgba(17,34,64,0.5);
+  border: 1px solid rgba(168,216,234,0.08);
+  border-radius: 5px;
+  padding: 16px;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.exercise-card:hover {
+  border-color: var(--month-color);
+  background: rgba(17,34,64,0.8);
+}
+
+.ex-name { font-size: 15px; font-weight: 600; color: var(--frost); margin-bottom: 4px; }
+.ex-sets { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--month-color); margin-bottom: 8px; }
+.ex-desc { font-size: 13px; color: var(--muted); line-height: 1.5; font-style: italic; }
+
+/* ── Tips box ── */
+.tips-box {
+  background: rgba(201,169,110,0.05);
+  border: 1px solid rgba(201,169,110,0.2);
+  border-radius: 6px;
+  padding: 24px 28px;
+  margin-bottom: 48px;
+}
+
+.tips-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.tips-list { list-style: none; }
+
+.tips-list li {
+  font-size: 15px;
+  color: var(--silver);
+  padding: 6px 0 6px 20px;
+  position: relative;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.tips-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .week-grid { grid-template-columns: 1fr; }
+  .exercise-grid { grid-template-columns: repeat(2, 1fr); }
+  .overview { grid-template-columns: repeat(2, 1fr); }
+  .month-nav { flex-wrap: wrap; }
+  .day-row { grid-template-columns: 70px 1fr; }
+}
+
+@media (max-width: 480px) {
+  .exercise-grid { grid-template-columns: 1fr; }
+}

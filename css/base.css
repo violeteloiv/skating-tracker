@@ -1,0 +1,191 @@
+/* ============================================================
+   base.css — variables, reset, layout, typography, shared UI
+   ============================================================ */
+
+:root {
+  --ice: #ddf0f7;
+  --ice-deep: #a8d8ea;
+  --silver: #c8d6df;
+  --midnight: #0b1a2e;
+  --navy: #112240;
+  --frost: #e8f4f8;
+  --gold: #c9a96e;
+  --gold-light: #e8d5a3;
+  --text: #1a2e3b;
+  --muted: #5a7a8a;
+  --m1: #4a90b8;
+  --m2: #6b5b9e;
+  --m3: #3a9e7a;
+  --m4: #c05050;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Cormorant Garamond', serif;
+  background: var(--midnight);
+  color: var(--frost);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background rink texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(168,216,234,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(74,144,184,0.08) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(168,216,234,0.02) 60px, rgba(168,216,234,0.02) 61px),
+    repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(168,216,234,0.015) 80px, rgba(168,216,234,0.015) 81px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* ── Header ── */
+header {
+  text-align: center;
+  padding: 64px 24px 48px;
+  position: relative;
+}
+
+.header-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ice-deep);
+  border: 1px solid rgba(168,216,234,0.3);
+  padding: 6px 18px;
+  margin-bottom: 24px;
+  border-radius: 2px;
+}
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 9vw, 96px);
+  letter-spacing: 4px;
+  line-height: 0.9;
+  background: linear-gradient(135deg, #fff 0%, var(--ice-deep) 40%, var(--gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-style: italic;
+  color: var(--silver);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+/* ── Top-level page tabs ── */
+.page-tab-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 48px;
+  border: 1px solid rgba(168,216,234,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.page-tab-btn {
+  flex: 1;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 16px 24px;
+  border: none;
+  background: rgba(11,26,46,0.6);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s;
+  border-right: 1px solid rgba(168,216,234,0.1);
+  position: relative;
+}
+
+.page-tab-btn:last-child { border-right: none; }
+
+.page-tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--ice-deep);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.page-tab-btn:hover { background: rgba(168,216,234,0.06); color: var(--silver); }
+.page-tab-btn.active { background: rgba(168,216,234,0.1); color: var(--frost); }
+.page-tab-btn.active::after { opacity: 1; }
+.page-tab-icon { margin-right: 8px; font-size: 14px; }
+
+/* ── Page sections ── */
+.page-section { display: none; animation: fadeUp 0.35s ease; }
+.page-section.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Shared sub-tab nav (month-btn used in both plan and tracker) ── */
+.month-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.25s;
+  border-radius: 3px 3px 0 0;
+}
+
+.month-btn:hover { color: var(--frost); background: rgba(168,216,234,0.04); }
+.month-btn.active {
+  color: white;
+  border-bottom-color: var(--accent-color, var(--m1));
+  background: rgba(168,216,234,0.06);
+}
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 48px 24px;
+  border-top: 1px solid rgba(168,216,234,0.08);
+  margin-top: 40px;
+}
+
+footer p {
+  font-size: 14px;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.8;
+}
+
+.snowflake {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.4;
+  letter-spacing: 20px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .month-btn { padding: 10px 16px; font-size: 11px; }
+}
