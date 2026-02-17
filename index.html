@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure Skating Off-Ice Training Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ice: #ddf0f7;
+    --ice-deep: #a8d8ea;
+    --silver: #c8d6df;
+    --midnight: #0b1a2e;
+    --navy: #112240;
+    --frost: #e8f4f8;
+    --gold: #c9a96e;
+    --gold-light: #e8d5a3;
+    --text: #1a2e3b;
+    --muted: #5a7a8a;
+    --m1: #4a90b8;
+    --m2: #6b5b9e;
+    --m3: #3a9e7a;
+    --m4: #c05050;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cormorant Garamond', serif;
+    background: var(--midnight);
+    color: var(--frost);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background rink texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(168,216,234,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(74,144,184,0.08) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(168,216,234,0.02) 60px, rgba(168,216,234,0.02) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(168,216,234,0.015) 80px, rgba(168,216,234,0.015) 81px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 64px 24px 48px;
+    position: relative;
+  }
+
+  .header-badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ice-deep);
+    border: 1px solid rgba(168,216,234,0.3);
+    padding: 6px 18px;
+    margin-bottom: 24px;
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 9vw, 96px);
+    letter-spacing: 4px;
+    line-height: 0.9;
+    background: linear-gradient(135deg, #fff 0%, var(--ice-deep) 40%, var(--gold-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--silver);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  /* Overview strip */
+  .overview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(168,216,234,0.15);
+    border: 1px solid rgba(168,216,234,0.15);
+    border-radius: 4px;
+    margin: 0 0 56px;
+    overflow: hidden;
+  }
+
+  .overview-item {
+    background: rgba(11,26,46,0.8);
+    padding: 24px 20px;
+    text-align: center;
+    transition: background 0.3s;
+  }
+
+  .overview-item:hover { background: rgba(168,216,234,0.06); }
+
+  .overview-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 2px;
+    color: var(--ice-deep);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .overview-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Month navigation */
+  .month-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid rgba(168,216,234,0.1);
+    padding-bottom: 0;
+  }
+
+  .month-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.25s;
+    border-radius: 3px 3px 0 0;
+  }
+
+  .month-btn:hover { color: var(--frost); background: rgba(168,216,234,0.04); }
+
+  .month-btn.active {
+    color: white;
+    border-bottom-color: var(--accent-color, var(--m1));
+    background: rgba(168,216,234,0.06);
+  }
+
+  /* Month panel */
+  .month-panel { display: none; animation: fadeUp 0.4s ease; }
+  .month-panel.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .month-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    margin-bottom: 40px;
+    padding: 32px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.07);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .month-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--month-gradient);
+    opacity: 0.07;
+  }
+
+  .month-num-big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    line-height: 0.85;
+    letter-spacing: 2px;
+    color: var(--month-color);
+    opacity: 0.25;
+    flex-shrink: 0;
+  }
+
+  .month-info { position: relative; z-index: 1; }
+
+  .month-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 3px;
+    color: var(--month-color);
+    margin-bottom: 8px;
+  }
+
+  .month-theme {
+    font-size: 18px;
+    font-style: italic;
+    color: var(--silver);
+    font-weight: 300;
+    margin-bottom: 12px;
+  }
+
+  .month-focus {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .focus-tag {
+    display: inline-block;
+    background: rgba(168,216,234,0.08);
+    border: 1px solid rgba(168,216,234,0.15);
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin: 2px;
+    color: var(--ice);
+  }
+
+  /* Week grid */
+  .weeks-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .week-card {
+    background: rgba(17,34,64,0.6);
+    border: 1px solid rgba(168,216,234,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+
+  .week-card:hover {
+    border-color: rgba(168,216,234,0.25);
+    transform: translateY(-2px);
+  }
+
+  .week-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: rgba(168,216,234,0.05);
+    border-bottom: 1px solid rgba(168,216,234,0.08);
+  }
+
+  .week-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--month-color);
+    flex-shrink: 0;
+  }
+
+  .week-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--silver);
+  }
+
+  .week-body { padding: 20px; }
+
+  /* Day rows */
+  .day-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(168,216,234,0.06);
+    align-items: start;
+  }
+
+  .day-row:last-child { border-bottom: none; }
+
+  .day-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--month-color);
+    padding-top: 1px;
+  }
+
+  .day-content { font-size: 14px; color: var(--silver); line-height: 1.5; font-weight: 300; }
+
+  .day-content strong { color: var(--frost); font-weight: 600; font-style: italic; }
+
+  .rest-day .day-content { color: var(--muted); font-style: italic; }
+
+  /* Exercise detail sections */
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(168,216,234,0.1);
+  }
+
+  .exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .exercise-card {
+    background: rgba(17,34,64,0.5);
+    border: 1px solid rgba(168,216,234,0.08);
+    border-radius: 5px;
+    padding: 16px;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .exercise-card:hover {
+    border-color: var(--month-color);
+    background: rgba(17,34,64,0.8);
+  }
+
+  .ex-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--frost);
+    margin-bottom: 4px;
+  }
+
+  .ex-sets {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--month-color);
+    margin-bottom: 8px;
+  }
+
+  .ex-desc { font-size: 13px; color: var(--muted); line-height: 1.5; font-style: italic; }
+
+  /* Tips box */
+  .tips-box {
+    background: rgba(201,169,110,0.05);
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+
+  .tips-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .tips-list { list-style: none; }
+
+  .tips-list li {
+    font-size: 15px;
+    color: var(--silver);
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .tips-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-style: normal;
+  }
+
+  /* Progress bar */
+  .progress-section { margin-bottom: 20px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 3px;
+    background: rgba(168,216,234,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--month-color), var(--ice-deep));
+    border-radius: 2px;
+    transition: width 0.8s ease;
+  }
+
+  /* Equipment callout */
+  .equipment-box {
+    background: rgba(74,144,184,0.06);
+    border: 1px solid rgba(74,144,184,0.2);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .equip-icon { font-size: 28px; flex-shrink: 0; }
+
+  .equip-text h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ice-deep);
+    margin-bottom: 8px;
+  }
+
+  .equip-text p { font-size: 14px; color: var(--silver); line-height: 1.6; font-style: italic; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 48px 24px;
+    border-top: 1px solid rgba(168,216,234,0.08);
+    margin-top: 40px;
+  }
+
+  footer p {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.8;
+  }
+
+  .snowflake {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 16px;
+    opacity: 0.4;
+    letter-spacing: 20px;
+  }
+
+  /* ===== TRACKER STYLES ===== */
+  .tracker-card {
+    background: rgba(17,34,64,0.7);
+    border: 1px solid rgba(168,216,234,0.1);
+    border-radius: 6px;
+    padding: 22px;
+    transition: border-color 0.3s;
+  }
+  .tracker-card:hover { border-color: rgba(168,216,234,0.2); }
+
+  .tracker-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ice-deep);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(168,216,234,0.1);
+  }
+
+  .tracker-field {
+    margin-bottom: 14px;
+  }
+
+  .tracker-field label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .tracker-field input[type="number"],
+  .tracker-field input[type="date"],
+  .tracker-field select,
+  .tracker-field textarea {
+    width: 100%;
+    background: rgba(11,26,46,0.8);
+    border: 1px solid rgba(168,216,234,0.15);
+    border-radius: 4px;
+    padding: 9px 12px;
+    color: var(--frost);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .tracker-field input[type="number"]:focus,
+  .tracker-field input[type="date"]:focus,
+  .tracker-field select:focus,
+  .tracker-field textarea:focus {
+    border-color: var(--ice-deep);
+  }
+
+  .tracker-field input[type="range"] {
+    width: calc(100% - 36px);
+    accent-color: var(--ice-deep);
+    vertical-align: middle;
+    cursor: pointer;
+  }
+
+  .tracker-field textarea {
+    resize: vertical;
+    min-height: 70px;
+    line-height: 1.5;
+  }
+
+  .range-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--ice-deep);
+    margin-left: 10px;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  .save-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: rgba(168,216,234,0.12);
+    border: 1px solid rgba(168,216,234,0.35);
+    color: var(--ice);
+    padding: 12px 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .save-btn:hover { background: rgba(168,216,234,0.22); border-color: var(--ice-deep); }
+
+  .clear-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid rgba(168,216,234,0.15);
+    color: var(--muted);
+    padding: 11px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .clear-btn:hover { color: var(--frost); border-color: rgba(168,216,234,0.3); }
+
+  /* History entries */
+  .history-entry {
+    background: rgba(17,34,64,0.6);
+    border: 1px solid rgba(168,216,234,0.1);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .history-entry:hover { border-color: rgba(168,216,234,0.22); }
+
+  .history-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .history-entry-date {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: var(--ice-deep);
+  }
+
+  .history-entry-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    background: rgba(168,216,234,0.08);
+    color: var(--silver);
+    border: 1px solid rgba(168,216,234,0.15);
+  }
+
+  .history-entry-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+
+  .history-stat {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .history-stat span { color: var(--silver); }
+
+  .history-notes {
+    margin-top: 10px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--muted);
+    border-top: 1px solid rgba(168,216,234,0.07);
+    padding-top: 10px;
+    line-height: 1.6;
+  }
+
+  .delete-btn {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: rgba(192,80,80,0.4);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  .delete-btn:hover { color: #e08080; }
+
+  /* PB cards */
+  .pb-card {
+    background: rgba(17,34,64,0.6);
+    border: 1px solid rgba(168,216,234,0.1);
+    border-radius: 6px;
+    padding: 18px;
+    text-align: center;
+  }
+  .pb-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .pb-card-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .pb-card-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .pb-card-trend {
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  /* Simple bar chart */
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100px;
+    padding: 10px 0 4px;
+    border-bottom: 1px solid rgba(168,216,234,0.1);
+    margin-bottom: 8px;
+  }
+  .chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .chart-bar {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    min-height: 3px;
+    transition: height 0.6s ease;
+  }
+  .chart-bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .chart-val-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--silver);
+    margin-bottom: 2px;
+  }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-top: 12px;
+  }
+  .chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .chart-legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ===== TOP-LEVEL PAGE TABS ===== */
+  .page-tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 48px;
+    border: 1px solid rgba(168,216,234,0.15);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .page-tab-btn {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 24px;
+    border: none;
+    background: rgba(11,26,46,0.6);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.25s;
+    border-right: 1px solid rgba(168,216,234,0.1);
+    position: relative;
+  }
+
+  .page-tab-btn:last-child { border-right: none; }
+
+  .page-tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--ice-deep);
+    transform: scaleX(1);
+    transition: transform 0.25s;
+    opacity: 0;
+  }
+
+  .page-tab-btn:hover {
+    background: rgba(168,216,234,0.06);
+    color: var(--silver);
+  }
+
+  .page-tab-btn.active {
+    background: rgba(168,216,234,0.1);
+    color: var(--frost);
+  }
+
+  .page-tab-btn.active::after { opacity: 1; }
+
+  .page-tab-icon { margin-right: 8px; font-size: 14px; }
+
+  .page-section { display: none; animation: fadeUp 0.35s ease; }
+  .page-section.active { display: block; }
+
+  @media (max-width: 768px) {
+    #tracker-section .tracker-card { grid-column: 1/-1 !important; }
+    #pb-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
+
+  @media (max-width: 768px) {
+    .week-grid { grid-template-columns: 1fr; }
+    .exercise-grid { grid-template-columns: repeat(2, 1fr); }
+    .overview { grid-template-columns: repeat(2, 1fr); }
+    .month-nav { flex-wrap: wrap; }
+    .month-btn { padding: 10px 16px; font-size: 11px; }
+    .day-row { grid-template-columns: 70px 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .exercise-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-badge">Off-Ice Training Program</div>
+    <h1>Figure Skating<br>Foundation</h1>
+    <p class="subtitle">A 4-Month Progressive Training Plan for Beginners</p>
+  </header>
+
+  <!-- TOP-LEVEL PAGE TABS -->
+  <nav class="page-tab-bar">
+    <button class="page-tab-btn active" id="ptab-plan" onclick="showPage('plan')">
+      <span class="page-tab-icon">⛸</span>Training Plan
+    </button>
+    <button class="page-tab-btn" id="ptab-tracker" onclick="showPage('tracker')">
+      <span class="page-tab-icon">📊</span>Progress Tracker
+    </button>
+  </nav>
+
+  <!-- ===== PAGE: TRAINING PLAN ===== -->
+  <div class="page-section active" id="page-plan">
+
+  <div class="overview">
+    <div class="overview-item">
+      <div class="overview-num">4</div>
+      <div class="overview-label">Months</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-num">5</div>
+      <div class="overview-label">Days / Week</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-num">30–60</div>
+      <div class="overview-label">Min / Session</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-num">0→1</div>
+      <div class="overview-label">Beginner Friendly</div>
+    </div>
+  </div>
+
+  <!-- Month navigation -->
+  <div class="month-nav">
+    <button class="month-btn active" onclick="showMonth(1)" style="--accent-color: #4a90b8">Month 1</button>
+    <button class="month-btn" onclick="showMonth(2)" style="--accent-color: #6b5b9e">Month 2</button>
+    <button class="month-btn" onclick="showMonth(3)" style="--accent-color: #3a9e7a">Month 3</button>
+    <button class="month-btn" onclick="showMonth(4)" style="--accent-color: #c05050">Month 4</button>
+  </div>
+
+  <!-- ===== MONTH 1 ===== -->
+  <div class="month-panel active" id="month-1" style="--month-color: #4a90b8; --month-gradient: linear-gradient(135deg, #4a90b8, #a8d8ea);">
+
+    <div class="month-header">
+      <div class="month-num-big">01</div>
+      <div class="month-info">
+        <div class="month-title">Foundation</div>
+        <div class="month-theme">"Learn to feel your body in space"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Balance basics</span>
+          <span class="focus-tag">Core awakening</span>
+          <span class="focus-tag">Mobility</span>
+          <span class="focus-tag">Body awareness</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          This month is all about waking up your body. Every exercise is gentle and introductory. You'll build the habits and posture that skating demands — no rushing, no pain. 3 sets of each exercise unless noted.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">🏋️</div>
+      <div class="equip-text">
+        <h4>Equipment This Month</h4>
+        <p>Just your 5 lb dumbbell and a yoga mat or soft floor. No other equipment needed — this month is all about learning movement patterns with your bodyweight.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Weekly Schedule — Repeat All 4 Weeks (increasing reps by 2 each week)</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Monday — Lower Body & Balance Intro</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min easy march in place, ankle circles, gentle leg swings holding a wall</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Wall squats</strong> — back flat on wall, slide down until thighs are parallel. Hold 10 sec, stand. 8 reps. This teaches the bent-knee position used constantly in skating.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Standing calf raises</strong> — hold wall for balance, rise onto toes slowly, lower slowly. 15 reps. Essential for push-off power.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Single-leg stand</strong> — hold wall lightly, lift one foot 2 inches off floor, hold 10 seconds each side. 3 rounds. The foundational skating balance skill.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Bodyweight squats</strong> — feet hip-width, sit back like sitting into a chair, stand up. 10 reps. Focus on keeping chest up and knees over toes.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">5 min: seated hamstring stretch, quad stretch holding wall, calf stretch on step</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Tuesday — Core & Posture Foundations</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min: arm circles, torso rotations, cat-cow stretches on hands and knees</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Dead bug</strong> — lie on back, arms up, knees bent at 90°. Slowly lower one arm and the opposite leg toward floor without touching, return. 8 each side. Trains the deep core stabilizers skaters rely on.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Wall angels</strong> — stand with back, head, and arms flat on wall. Slowly slide arms up and down like a snow angel. 10 reps. Fixes rounded shoulders and builds skating posture.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Glute bridges</strong> — lie on back, feet flat, lift hips until body is a straight line. Hold 3 sec, lower. 12 reps. Builds the glutes that drive every skating push.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Knee plank hold</strong> — on hands and knees, lower to forearms, hold a straight line from knees to head. 15–20 sec holds, 3 times. Your first plank — build the habit.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Child's pose, chest opener on floor, gentle neck stretches</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Wednesday — Flexibility & Body Awareness</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min light movement, gentle joint circles from ankles to shoulders</div></div>
+          <div class="day-row"><div class="day-label">Stretch 1</div><div class="day-content"><strong>Hip flexor lunge stretch</strong> — one knee on floor, other foot forward. Gently push hips forward. Hold 30 sec each side. Tight hip flexors are one of the biggest limiters for new skaters.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 2</div><div class="day-content"><strong>Seated straddle</strong> — sit with legs wide apart, gently lean forward with flat back. Hold 45 sec. Builds inner thigh and hip flexibility for wider skating stance.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 3</div><div class="day-content"><strong>Figure-4 stretch</strong> — lie on back, cross one ankle over opposite knee, pull both toward chest. Hold 30 sec each side. Opens the hips for rotation in jumps and spins.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 4</div><div class="day-content"><strong>Doorway chest stretch</strong> — place forearms on doorframe, lean gently through. Hold 30 sec. Opens the chest for the upright posture skaters need.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 5</div><div class="day-content"><strong>Ankle alphabet</strong> — seated, lift one foot, draw the alphabet with your toes. Both feet. Builds the ankle mobility crucial for edges and footwork.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Thursday — Arms, Posture & Position Practice</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min: shoulder rolls, arm swings, gentle upper back stretches</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Dumbbell lateral raises</strong> (5 lb) — stand tall, raise arms out to sides to shoulder height, lower slowly. 10 reps. Builds the shoulder strength to hold beautiful arm positions.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Skating arm position holds</strong> — stand with feet together, hold arms in an oval skating position (like hugging a beach ball). Hold 30 sec without dropping. Trains arm muscle memory.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Dumbbell bent-over row</strong> — hinge at hips, pull 5lb weight to hip with elbow back. 10 each arm. Builds back strength for upright skating posture.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Modified push-ups</strong> — from knees, lower chest to floor and press up. 8 reps. Beginner-friendly chest and arm strength.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Shoulder cross-body stretch, tricep stretch, wrist circles</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Friday — Full Body & Skating Simulation</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min: march in place, hip circles, arm swings</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Skater stance hold</strong> — bend knees softly, lean slightly forward from hips (not waist), arms in oval. Hold 20 sec. This is the actual skating ready position — get comfortable here.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Side step squats</strong> — in squat position, step sideways 4 steps left, 4 steps right. 3 rounds. Mimics the lateral movement of skating strides.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Balance reach</strong> — stand on one leg, slowly reach other leg forward, to side, and behind. 5 reaches each direction per leg. Builds the controlled balance used on every edge.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Spiral introduction</strong> — hold wall, slowly lift one leg behind you as high as comfortable, hold 5 sec. 5 each leg. Your first practice of the iconic skating spiral position.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">10 min full body stretch — spend extra time on anything that feels tight</div></div>
+        </div>
+      </div>
+
+      <div class="week-card rest-day">
+        <div class="week-header"><div class="week-dot" style="background:var(--muted)"></div><div class="week-title">Saturday & Sunday — Rest & Recovery</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Saturday</div><div class="day-content">Optional: 20 min gentle walk or easy yoga. Watch figure skating videos and notice skaters' posture, arm positions, and body lines.</div></div>
+          <div class="day-row"><div class="day-label">Sunday</div><div class="day-content">Full rest. Muscles grow during rest, not during training — this is when your work pays off. Gentle stretching while watching TV is fine.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Month 1 — Key Exercises Explained</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">Wall Squat</div>
+        <div class="ex-sets">3 × 8 reps, 10 sec hold</div>
+        <div class="ex-desc">Teaches the bent-knee "ready position" that is the foundation of all skating. Back flat on wall keeps your form honest.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Dead Bug</div>
+        <div class="ex-sets">3 × 8 each side</div>
+        <div class="ex-desc">Activates deep core stabilizers without straining the back. The anti-rotation demand mirrors what your core does on every skating edge.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Single-Leg Stand</div>
+        <div class="ex-sets">3 × 10 sec each leg</div>
+        <div class="ex-desc">Nearly all skating happens on one foot at a time. This humble exercise is foundational — master it before anything else.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Glute Bridge</div>
+        <div class="ex-sets">3 × 12 reps</div>
+        <div class="ex-desc">The glutes are the engine of skating. Every push, every landing, every edge relies on strong glutes. This gentle exercise wakes them up.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Hip Flexor Stretch</div>
+        <div class="ex-sets">Hold 30 sec × 3</div>
+        <div class="ex-desc">Tight hip flexors tilt the pelvis forward and ruin skating posture. Releasing them is one of the most impactful things a beginner can do.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Skater Stance Hold</div>
+        <div class="ex-sets">3 × 20 sec holds</div>
+        <div class="ex-desc">Practice the actual skating posture — knees bent, slight forward lean from hips, arms out. Your body needs to memorize this feeling.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Month 1 — Coaching Notes</div>
+      <ul class="tips-list">
+        <li>If any exercise feels painful (not just hard), stop and rest. Muscle fatigue is expected; joint pain is not.</li>
+        <li>In Week 1, add 2 reps to everything. Week 2, add 2 more. Week 3, add 2 more. Week 4, aim for the Week 3 numbers with better form.</li>
+        <li>Film yourself doing the skater stance hold and compare your posture to a skater on video — you'll learn a lot.</li>
+        <li>Go slow on every single-leg exercise. Speed cheats balance. Slow forces your stabilizers to actually engage.</li>
+        <li>The ankle alphabet seems silly but is genuinely one of the best things you can do for skating. Do it every day, even while watching TV.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== MONTH 2 ===== -->
+  <div class="month-panel" id="month-2" style="--month-color: #6b5b9e; --month-gradient: linear-gradient(135deg, #6b5b9e, #a89bcc);">
+
+    <div class="month-header">
+      <div class="month-num-big">02</div>
+      <div class="month-info">
+        <div class="month-title">Build</div>
+        <div class="month-theme">"Develop strength, range of motion, and single-leg control"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Single-leg strength</span>
+          <span class="focus-tag">Deeper flexibility</span>
+          <span class="focus-tag">Core stability</span>
+          <span class="focus-tag">Jump landing prep</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          You've built your base. Now we add challenge — harder variations, longer holds, and more skating-specific movements. Exercises progress from "learning the pattern" to "building strength in the pattern." Add resistance bands this month if possible.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">🎽</div>
+      <div class="equip-text">
+        <h4>Recommended New Equipment</h4>
+        <p>A set of light resistance bands (~$12) is strongly recommended this month. They're the single most useful skating training tool — used for hip strengthening, ankle work, and position resistance. A yoga mat if you don't have one.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Weekly Schedule — Increase reps/duration by ~10% each week</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Monday — Single-Leg Strength</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">8 min: dynamic leg swings, hip circles, 2 min light jog in place</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Assisted single-leg squat</strong> — hold chair, lower on one leg until other foot touches floor lightly, stand back up. 8 each leg. A huge step up from two-legged squats — the knee tracking matters!</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Lateral band walks</strong> (if you have bands) or wide sumo squat walks — step sideways in a squat position, 10 steps each direction. 3 rounds. Directly targets hip abductors that control every skating edge.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Step-up</strong> — use a sturdy step or stair, step up with right foot, bring left foot up, step back down. 12 each leg. Adds functional single-leg power without jumping yet.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Single-leg calf raises</strong> — hold wall, rise up on one foot only. 12 each leg. Much harder than two-legged, mimics the toe push in skating.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">10 min lower body stretching, focusing on inner thighs and glutes</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Tuesday — Core Stability & Rotation</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min: cat-cow, bird dog warmup, torso rotations standing</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Full plank hold</strong> — now on toes instead of knees. Hold 20–30 sec. If this is too hard, do 15 sec full, then drop to knees. Build the real plank this month.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Standing wood chops</strong> (5 lb dumbbell) — hold weight with both hands, rotate from shoulder height diagonally down to opposite hip. 12 each side. Builds rotational core power used in all jumps.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Bird dog with hold</strong> — from hands and knees, extend opposite arm and leg, hold 5 sec, return. 10 each side. Same as Month 1 but now hold it still — challenge the balance harder.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Glute bridge march</strong> — in bridge position, slowly lift one foot 3 inches off floor, lower, switch sides while keeping hips level. 10 each leg. Much harder than the static bridge!</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Spine twist stretch, cobra pose, child's pose</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Wednesday — Deep Flexibility</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min: full body gentle movement, get warm before stretching deeply</div></div>
+          <div class="day-row"><div class="day-label">Stretch 1</div><div class="day-content"><strong>Low lunge with twist</strong> — in lunge position, reach arm toward ceiling and rotate. Hold 30 sec each side. Opens hip flexors and thoracic spine together — both critical for skating.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 2</div><div class="day-content"><strong>Pigeon pose</strong> — from plank, bring one knee forward behind wrist, lower onto forearms if possible. Hold 45 sec–1 min each side. The gold standard hip opener.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 3</div><div class="day-content"><strong>Frog stretch</strong> — on hands and knees, slowly slide knees apart as wide as comfortable, lower to forearms. Hold 60 sec. Opens inner thighs for wider stance and crossovers.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 4</div><div class="day-content"><strong>Standing quad stretch with balance</strong> — without holding wall, bend one knee and hold ankle behind you. Balance 20 sec each side. Combines flexibility and balance practice.</div></div>
+          <div class="day-row"><div class="day-label">Stretch 5</div><div class="day-content"><strong>Shoulder + back opening</strong> — seated, cross one arm, thread needle under body. Works the thoracic rotation needed for upper body presentation.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Thursday — Upper Body & Arm Training</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min: arm circles, shoulder rolls, light dumbbell warmup movements</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Full push-up</strong> — progress from knees to toes this month, even if just 3–4 reps before dropping to knees. 3 sets working toward 8 full reps. Arm strength matters more than you'd think for spin entry and jump takeoff.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Arm position endurance</strong> — hold arms in skating oval for 45 sec, transition to arabesque arm position (one arm forward, one back), hold 30 sec. 3 rounds. Your arms must hold positions throughout a program without drooping.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Dumbbell shoulder press</strong> (5 lb) — seated or standing, press both arms overhead from shoulder height. 12 reps. Builds overhead strength for future overhead lifts and lift positions.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Superman hold</strong> — lie face down, lift arms and legs off floor simultaneously, hold 5 sec. 10 reps. Builds back extensors needed for the layback and camel positions.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Chest stretch, shoulder stretch, wrist and forearm release</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Friday — Jump Preparation & Power</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">8 min: jog in place, high knees, butt kicks, leg swings — get fully warm before jumping!</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Jump squat with landing hold</strong> — squat down, jump up, land softly and hold the landing position for 3 sec. 10 reps. The landing position (one leg bent, arms in, opposite leg back) is the most important skill you're building for jumping.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Lateral bounds</strong> — jump sideways from one foot to the other, sticking the landing for 2 sec before jumping back. 8 each side. Builds the explosive lateral power of the skating stride.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Tuck position practice</strong> — stand, then rapidly pull arms and one knee to your chest (like the midair position of a jump), hold balance. 10 each leg. Training air position muscle memory before you're actually airborne on skates.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Spiral hold without wall</strong> — stand freely, slowly lift one leg behind as high as comfortable, hold for 10 sec. 4 each leg. Progress from Month 1's wall-supported version.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">10 min: full body stretch, pay attention to anything that's sore from jumping</div></div>
+        </div>
+      </div>
+
+      <div class="week-card rest-day">
+        <div class="week-header"><div class="week-dot" style="background:var(--muted)"></div><div class="week-title">Saturday & Sunday — Rest & Active Recovery</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Saturday</div><div class="day-content">Optional: 20–30 min yoga for athletes, or a brisk walk. Review your Month 1 progress — can you feel improvement in your balance? Your squat depth?</div></div>
+          <div class="day-row"><div class="day-label">Sunday</div><div class="day-content">Rest. Foam roll if you have one. Practice arm positions while sitting on the couch — it's more helpful than it seems!</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Month 2 — Key Progressions</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">Assisted Single-Leg Squat</div>
+        <div class="ex-sets">3 × 8 each leg</div>
+        <div class="ex-desc">Progresses the wall squat to real single-leg loading. Almost all skating movement is single-leg. This is the most skating-specific strength exercise you can do.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Jump Landing Hold</div>
+        <div class="ex-sets">3 × 10 reps</div>
+        <div class="ex-desc">You won't be jumping on the ice for a while, but building the landing position now means your body will know it when you arrive. Soft knees, controlled, quiet landing.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Lateral Band Walks</div>
+        <div class="ex-sets">3 × 10 steps each way</div>
+        <div class="ex-desc">The hip abductors drive every skating push. This is one of the most direct off-ice exercises for that specific muscle group, used constantly in edge work.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Wood Chops</div>
+        <div class="ex-sets">3 × 12 each side</div>
+        <div class="ex-desc">The rotational power of figure skating jumps comes from the obliques and core rotation. This exercise directly trains that diagonal force pattern.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Pigeon Pose</div>
+        <div class="ex-sets">Hold 45–60 sec each</div>
+        <div class="ex-desc">One of the most effective hip openers in existence. Deep hip flexibility dramatically improves the quality of spirals, spins, and the overall look of skating.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Free Spiral Hold</div>
+        <div class="ex-sets">4 × 10 sec each leg</div>
+        <div class="ex-desc">Progression from the wall-supported Month 1 version. The spiral is an iconic skating element — building it off-ice means you'll have head start on the ice.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Month 2 — Coaching Notes</div>
+      <ul class="tips-list">
+        <li>On the single-leg squat, watch your knee — it should track over your second toe, not cave inward. Use a mirror.</li>
+        <li>When landing jump squats, the sound matters — aim for silent, soft landings. Loud thumping landings are exactly what judges see on the ice.</li>
+        <li>If you can't do a full push-up yet, that's completely fine — partial reps (going halfway down) still build strength.</li>
+        <li>The frog stretch and pigeon pose may be uncomfortable — that's normal for tight hips. Breathe deeply into the stretch; never force it.</li>
+        <li>Try to get resistance bands this month. The lateral walk alone is worth the investment for skating hip development.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== MONTH 3 ===== -->
+  <div class="month-panel" id="month-3" style="--month-color: #3a9e7a; --month-gradient: linear-gradient(135deg, #3a9e7a, #7acfb5);">
+
+    <div class="month-header">
+      <div class="month-num-big">03</div>
+      <div class="month-info">
+        <div class="month-title">Power</div>
+        <div class="month-theme">"Build explosiveness, endurance, and on-ice-ready strength"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Explosive power</span>
+          <span class="focus-tag">Skating endurance</span>
+          <span class="focus-tag">Advanced balance</span>
+          <span class="focus-tag">Full position mastery</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          Two months of foundations pay off here. Training intensity rises noticeably. Sessions get longer, exercises get harder, and your body is now ready to handle real athletic training. You'll also add stamina work — skating is cardiovascularly demanding.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">⚖️</div>
+      <div class="equip-text">
+        <h4>Consider Upgrading Equipment</h4>
+        <p>If you can, a heavier dumbbell (8–10 lb) will enhance several exercises this month. A balance pad or folded yoga mat under your feet adds balance challenge. Jump rope ($8) is great for cardio that mimics skating rhythm.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Weekly Schedule — Intensity increases each week, track your personal bests</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Monday — Lower Body Power</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">10 min: jog, dynamic stretches, bodyweight squats × 15, hip circles</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Bulgarian split squat</strong> (5–10 lb dumbbell) — rear foot on chair, lower back knee toward floor. 10 each leg. One of the best single-leg strength builders — your thighs will feel it!</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Single-leg squat (no assist)</strong> — try to squat on one leg without holding anything. Even going a few inches counts. 5 attempts each leg. This is a milestone movement for skaters.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Plyometric step-ups</strong> — step up and drive the other knee up explosively, land softly. 10 each leg. Adds power and height to the basic step-up from Month 2.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Glute bridge with band</strong> — band just above knees, do bridge while pushing knees apart against the band. 15 reps. Doubles the glute activation of the regular bridge.</div></div>
+          <div class="day-row"><div class="day-label">Finisher</div><div class="day-content"><strong>Wall sit hold</strong> — 60 seconds. Builds the quad endurance needed to stay in skating position for a full program without rising up.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Tuesday — Core Power & Rotation</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">8 min: core activation — dead bugs × 10, bird dogs × 10, then light cardio</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Side plank with leg lift</strong> — in side plank on feet (not knees), lift top leg to hip height, hold 3 sec. 8 each side. Targets lateral core and hip abductors together — essential for edge control.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Russian twist</strong> (5 lb dumbbell) — seated, feet lifted, rotate side to side with dumbbell. 20 total reps. More demanding version of Month 2's standing chops — directly trains spin-entry rotation.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Plank with arm reach</strong> — in full plank, slowly extend one arm forward without rotating hips. 10 each arm. Anti-rotation core demand that mirrors the upper/lower body independence in skating.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>V-sit hold</strong> — sit with legs and torso lifted in a V shape, hold 15–20 sec. 4 rounds. Builds the compact core strength used in the sit spin position.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Full spinal release stretches, thoracic rotation work</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Wednesday — Cardio & Skating Endurance</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Note</div><div class="day-content">This is a new session type — skating demands aerobic endurance. A 2-minute program is exhausting if you're not conditioned. Build it here.</div></div>
+          <div class="day-row"><div class="day-label">Cardio</div><div class="day-content"><strong>20–25 minutes continuous</strong>: Jump rope (mimics skating rhythm best), running, cycling, or dancing. Keep a pace where you can speak in short sentences. Build to 30 min by Week 4.</div></div>
+          <div class="day-row"><div class="day-label">Drills</div><div class="day-content"><strong>Skating simulation intervals</strong> (3 rounds): 30 sec side-step squats + 30 sec single-leg balance + 30 sec rest. Mimics the on/off demands of skating between elements.</div></div>
+          <div class="day-row"><div class="day-label">Stretch</div><div class="day-content">20 min flexibility work after cardio — body is warm, perfect time for pigeon pose, straddle, back stretches. Hold each 60 sec.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Thursday — Upper Body & Performance Posture</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min: shoulder mobility flow, arm circles, band pull-aparts if you have a band</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Full push-ups</strong> — aim for 3 × 10 full reps this month. If needed, do as many as possible full, then finish on knees. Track your progress week to week.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Dumbbell front + lateral raise combo</strong> — raise both arms forward to shoulder height, lower, then raise to the sides. 12 reps each direction. Builds 360° shoulder endurance for sustained arm presentation.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Bent-over Y-T-W</strong> — hinge at hips, raise arms to form Y shape, then T, then W. No weight needed — these small movements build the postural muscles that hold a skater upright.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Superman → back extension</strong> — from superman position, slowly lower and raise. 12 reps. Builds the back endurance for layback and camel spin positions.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Upper body flexibility — chest, shoulders, wrists, neck release</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Friday — Skating Elements Practice</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">10 min full body dynamic warm-up — treat this like a pre-skate warmup</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Spin position balance</strong> — stand on one leg, bring free leg to a "scratch spin" position (knee up, then extend), hold 10 sec. 5 each leg. Directly training the scratch spin you'll do on the ice.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Sit spin squat</strong> — squat deeply on one leg (other extended to the side), hold 5–10 sec. 5 each leg. The sit spin requires serious one-leg squat depth — build it here.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Spiral to arabesque flow</strong> — stand, flow from spiral (leg back) to arabesque (leg back with arms open), hold 5 sec each. 6 reps each leg. Builds the back and hip strength for these iconic positions.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Jump sequence</strong> — squat jump, stick landing for 3 sec, then immediately lateral bound to the other foot, stick 3 sec. 8 sequences. Simulates the pattern of jumping on ice.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">10–15 min full body stretch — you've earned it</div></div>
+        </div>
+      </div>
+
+      <div class="week-card rest-day">
+        <div class="week-header"><div class="week-dot" style="background:var(--muted)"></div><div class="week-title">Saturday & Sunday — Recovery</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Saturday</div><div class="day-content">Light yoga (30 min), foam rolling if available, or easy walk. By now your body needs this recovery day — training is getting serious.</div></div>
+          <div class="day-row"><div class="day-label">Sunday</div><div class="day-content">Rest. This is also a good day to watch skating videos analytically — look for the positions you've been practicing. You'll recognize them in a whole new way.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Month 3 — Key Progressions</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">Bulgarian Split Squat</div>
+        <div class="ex-sets">3 × 10 each leg</div>
+        <div class="ex-desc">The king of single-leg skating strength. Rear foot elevated creates a deep range of motion that directly translates to powerful skating strides and controlled landings.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Scratch Spin Balance</div>
+        <div class="ex-sets">5 × 10 sec each leg</div>
+        <div class="ex-desc">Practicing the actual spin position off-ice means your body already knows the shape when you get on the ice. Muscle memory is built on land first.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Side Plank Leg Lift</div>
+        <div class="ex-sets">3 × 8 each side</div>
+        <div class="ex-desc">Targets the lateral hip and core stabilizers simultaneously — the exact combination needed to hold a clean outside edge in skating.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Cardio Block</div>
+        <div class="ex-sets">25–30 min continuous</div>
+        <div class="ex-desc">New skaters are often surprised how winded they get. A 2-minute program at competition intensity is a true cardiovascular challenge — build that engine now.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Sit Spin Squat</div>
+        <div class="ex-sets">5 × 5–10 sec each leg</div>
+        <div class="ex-desc">The sit spin requires the ability to hold a very deep squat on one leg while spinning. This position practice builds both the strength and the flexibility needed.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Jump Sequence</div>
+        <div class="ex-sets">3 × 8 sequences</div>
+        <div class="ex-desc">Chaining jump to bound to stick mimics the rhythm of jumping on ice — takeoff, flight, land, recover. Your nervous system learns the pattern before the blades do.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Month 3 — Coaching Notes</div>
+      <ul class="tips-list">
+        <li>The Bulgarian split squat is challenging — start with just bodyweight for the first week before adding the dumbbell. Knee tracking still matters.</li>
+        <li>For skating positions (scratch spin, sit spin, spiral), practice in front of a mirror or film yourself. Compare your line to skaters on video.</li>
+        <li>Cardio day is not optional — cardiovascular fitness is as important as strength for skating. A jump skater who's winded can't execute clean landings.</li>
+        <li>If the full push-up is still difficult, keep at it — by the end of this month most people can do 5–8. Consistency over perfection.</li>
+        <li>You may notice your ankle mobility has improved significantly since Month 1. Test it — can you do a deeper plie? That's real progress.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== MONTH 4 ===== -->
+  <div class="month-panel" id="month-4" style="--month-color: #c05050; --month-gradient: linear-gradient(135deg, #c05050, #e08080);">
+
+    <div class="month-header">
+      <div class="month-num-big">04</div>
+      <div class="month-info">
+        <div class="month-title">Performance</div>
+        <div class="month-theme">"Train like a skater — you're ready for the ice"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Peak strength</span>
+          <span class="focus-tag">Program endurance</span>
+          <span class="focus-tag">Sport-specific skill</span>
+          <span class="focus-tag">Skating readiness</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          The final month. Training mirrors what competitive figure skaters do off-season. You're not a beginner anymore — you have balance, strength, flexibility, and skating position knowledge. This month finalizes your readiness to step on the ice with real capability.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">🏆</div>
+      <div class="equip-text">
+        <h4>Final Month Equipment</h4>
+        <p>Use everything you have — dumbbells (upgrade to 8–10 lb where possible), resistance bands, and a balance surface. This month you'll also do a full "mock program run-through" — a sequence of movements done continuously for 2–3 minutes to simulate skating a program.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Weekly Schedule — This month, track everything. Compare Week 4 to Month 1 Week 1.</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Monday — Peak Lower Body Strength</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">10 min: full dynamic warm-up, end with 2 sets of bodyweight squats and lunges</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Single-leg squat (free)</strong> — no assist, aim for 3–5 good reps each leg. This is your Month 4 benchmark — how far can you go? Track the depth.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Bulgarian split squat</strong> (heavier if possible, 8–10 lb) — 12 each leg, 3 sets. You know this movement now — add weight and go deeper.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Lateral band walk + squat combo</strong> — 3 steps sideways, squat, 3 steps back, squat. 3 rounds × 10 reps. Combines the two most skating-specific lower body drills.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Jump to landing hold</strong> — jump as high as you comfortably can, land silently in perfect skating landing position. Hold 5 sec. 12 reps. Every jump on the ice lives or dies by this landing — make it automatic.</div></div>
+          <div class="day-row"><div class="day-label">Finisher</div><div class="day-content"><strong>Wall sit with dumbbell</strong> — hold 5 lb dumbbell extended in front during wall sit. 60–90 seconds. The hardest quad endurance test yet.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Tuesday — Core Mastery</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">8 min core activation circuit: dead bugs, bird dogs, glute bridges — 2 rounds, no rest</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Full plank hold</strong> — 3 × 45–60 seconds. Four months ago this was impossible. This is your benchmark — note how solid it feels now.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Plank rotations</strong> — from full plank, rotate into side plank, hold 5 sec, rotate back, then to other side. 8 full rotations. The rotational stability demanded for spins and jump take-offs.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Single-leg V-sit</strong> — in V-sit position, extend one leg fully while keeping other bent. 10 each side. Directly trains the core compression of a scratch spin.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Wood chop to balance</strong> — perform wood chop, end the movement by standing on one leg for 5 sec. 10 each side. Chains rotational power to single-leg stability — the exact demand of jump takeoffs.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">10 min: cobra to child's pose flow, seated spinal twist, full back release</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Wednesday — Cardio + Full Flexibility</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Cardio</div><div class="day-content"><strong>30 min continuous</strong> — aim for a consistent, moderate pace. If jumping rope, try skating rhythm: 2-count jumps mimicking left-right skating strides. Push to 35 min in Weeks 3–4.</div></div>
+          <div class="day-row"><div class="day-label">Mock Program</div><div class="day-content"><strong>2-minute skating simulation</strong> — design your own circuit: 15 sec skater stance hold → 15 sec side steps → 10 sec spin position → 15 sec spiral → 10 sec jump landing → 10 sec arm position hold → repeat. No rest for 2 minutes. This is program endurance.</div></div>
+          <div class="day-row"><div class="day-label">Flexibility</div><div class="day-content"><strong>30 min deep stretch</strong>: All your favorites — pigeon (90 sec each), straddle, hip flexor, back opening, shoulder. You've been building this range for 4 months — enjoy how far you've come.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Thursday — Full Upper Body + Posture Polish</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">5 min shoulder and thoracic mobility — the detailed kind that athletes do before training</div></div>
+          <div class="day-row"><div class="day-label">Exercise 1</div><div class="day-content"><strong>Full push-ups</strong> — 3 × 12–15. Month 4 benchmark: 12 clean full reps is excellent for a new athlete. Note your best set.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 2</div><div class="day-content"><strong>Arm choreography holds</strong> — practice moving through 5 different arm positions (skating oval, forward reach, arabesque arms, overhead, wrap) holding each for 20 sec with perfect posture. 3 full rounds. This is presentation training — how your arms look is as important as what your feet do.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 3</div><div class="day-content"><strong>Dumbbell complex</strong> — lateral raise × 10, front raise × 10, bent-over row × 10, shoulder press × 10, no rest between. 3 rounds. Builds real shoulder endurance for a full program's arm work.</div></div>
+          <div class="day-row"><div class="day-label">Exercise 4</div><div class="day-content"><strong>Posture circuit</strong> — wall angels × 10, superman holds × 10, Y-T-W × 10. Nonstop, 3 rounds. The muscles that hold your upper body in skating's upright, open position.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Friday — Full Skating Readiness Day</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Warm-Up</div><div class="day-content">12 min comprehensive warm-up — treat it exactly like warming up for a skating session</div></div>
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Scratch spin simulation</strong> — stand on one leg, arms wrapped in, free leg in position. Slowly turn your body 360° (step-turn) while maintaining balance. This is as close to a real spin as you can do off-ice.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Sit spin squat hold</strong> — 10 sec holds, 6 each leg. Can you get your thigh parallel to the floor? This is your Month 4 benchmark.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Spiral series</strong> — 15 sec spiral each leg, then transition to arabesque, then back. 4 rounds. Beautiful, sustained, strong. Your spiral should feel completely different from Month 1.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Jump sequence complex</strong> — jump squat (land and hold 2 sec) → lateral bound left (hold 2 sec) → lateral bound right (hold 2 sec) → tuck jump → hold landing. 8 full sequences. Program-level jump readiness.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">15 min: full body stretch and reflection. You just completed 4 months. How far have you come?</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot" style="background:var(--muted)"></div><div class="week-title">Saturday — Optional: Assessment Day (Month 4 Week 4 Only)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Test 1</div><div class="day-content">Single-leg balance, eyes closed — how long can you hold? (Month 1: 5–10 sec was hard. Month 4 goal: 30+ sec)</div></div>
+          <div class="day-row"><div class="day-label">Test 2</div><div class="day-content">How many full push-ups can you do? (Month 1: 0–4. Month 4 goal: 10–15)</div></div>
+          <div class="day-row"><div class="day-label">Test 3</div><div class="day-content">Spiral hold duration without wall — how long and how high? Film yourself and compare to Day 1.</div></div>
+          <div class="day-row"><div class="day-label">Test 4</div><div class="day-content">Sit squat depth on one leg — how low can you go? Compare hip and ankle flexibility Month 1 vs now.</div></div>
+          <div class="day-row"><div class="day-label">Test 5</div><div class="day-content">Can you complete the 2-minute mock program without stopping? Month 1 you would have been exhausted in 30 seconds.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Month 4 — What You've Built Over 4 Months</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">Balance</div>
+        <div class="ex-sets">From 10 sec → 30+ sec</div>
+        <div class="ex-desc">Single-leg balance on an unstable surface with eyes closed. Four months ago, 10 seconds with eyes open and a wall was the goal. The ice will feel much more natural now.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Core Strength</div>
+        <div class="ex-sets">From 15-sec knee plank → 60-sec full plank</div>
+        <div class="ex-desc">A strong, stable core means your upper and lower body can work independently on the ice — the hallmark of a technically proficient skater.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Single-Leg Strength</div>
+        <div class="ex-sets">From wall squat → free single-leg squat</div>
+        <div class="ex-desc">You've gone from struggling with a wall-supported two-legged squat to performing unassisted single-leg squats. Your landing strength is now real.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Flexibility</div>
+        <div class="ex-sets">Hip flexors, hamstrings, inner thighs</div>
+        <div class="ex-desc">Four months of consistent stretching produces remarkable results. Your spirals, sit spin, and overall skating line will reflect every minute spent on this.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Skating Positions</div>
+        <div class="ex-sets">Spiral, spin, landing, arabesque</div>
+        <div class="ex-desc">You've been physically practicing the shapes of skating for 4 months. Your muscle memory already knows what these positions should feel like — a huge advantage on the ice.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Cardiovascular Fitness</div>
+        <div class="ex-sets">From 0 → 30+ min endurance</div>
+        <div class="ex-desc">You can now sustain 30 minutes of aerobic work and simulate a full skating program without stopping. Your stamina will make learning on the ice far less exhausting.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Month 4 — Final Coaching Notes</div>
+      <ul class="tips-list">
+        <li>In Week 4, do the full assessment day on Saturday — film everything and compare to your earliest attempts. The difference will be motivating beyond words.</li>
+        <li>The 2-minute mock program is the most skating-specific thing you can do. Add real music and actual skating choreography you've watched to make it feel real.</li>
+        <li>By now your posture should have noticeably improved in daily life — straighter back, more open chest. Skating training does that.</li>
+        <li>Don't stop training when you start skating! Off-ice training becomes even more important once you're on the ice — it fixes weaknesses your coach identifies.</li>
+        <li>You've done something genuinely difficult. Four months of consistent training with real progression is an athletic accomplishment — be proud of it before your first lesson even happens.</li>
+      </ul>
+    </div>
+  </div>
+
+  </div><!-- end #page-plan -->
+
+  <!-- ===== PAGE: PROGRESS TRACKER ===== -->
+  <div class="page-section" id="page-tracker">
+  <!-- ===== PROGRESS TRACKER ===== -->
+  <div id="tracker-section" style="margin-top: 0;">
+    <div style="text-align:center; margin-bottom: 40px;">
+      <div class="header-badge">Progress Tracker</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,6vw,64px); letter-spacing:3px; background: linear-gradient(135deg, #fff 0%, var(--ice-deep) 60%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-top:12px;">Your Journey</h2>
+      <p style="font-style:italic; color:var(--muted); font-size:16px; margin-top:8px;">Log your metrics each week — data saves in your browser automatically.</p>
+    </div>
+
+    <!-- Tracker type selector (one tab per TRACKER_CONFIGS entry) -->
+    <div id="tracker-type-nav" style="display:flex; gap:4px; margin-bottom:32px; flex-wrap:wrap; border-bottom:1px solid rgba(168,216,234,0.1); padding-bottom:0;"></div>
+
+    <!-- Dynamic tracker container — built by JS from config -->
+    <div id="tracker-dynamic-container"></div>
+
+  </div>
+  </div><!-- end tracker-section -->
+  </div><!-- end #page-tracker -->
+
+  <footer>
+    <span class="snowflake">❄ ❄ ❄</span>
+    <p>
+      This program was designed for a complete beginner with no prior athletic background.<br>
+      Always warm up before training, cool down after, and rest when your body asks for it.<br>
+      <em>Consistency over intensity — showing up every week is more powerful than any single hard session.</em>
+    </p>
+  </footer>
+</div>
+
+<script>
+  // ===== TOP-LEVEL PAGE NAVIGATION =====
+  function showPage(page) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.page-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('ptab-' + page).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Render charts when switching to tracker so SVG width is correct
+    if (page === 'tracker') renderBenchmarks();
+  }
+
+  // ===== MONTH TAB NAVIGATION =====
+  function showMonth(num) {
+    document.querySelectorAll('.month-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.month-nav .month-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('month-' + num).classList.add('active');
+    document.querySelectorAll('.month-nav .month-btn')[num - 1].classList.add('active');
+    document.querySelector('.month-nav').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // =========================================================
+  // TRACKER CONFIG — add a new tracker by adding a new object
+  // to this array. That's it. The engine below does the rest.
+  // =========================================================
+  const TRACKER_CONFIGS = [
+    {
+      id: 'office',
+      label: '🏋️ Off-Ice Training',
+      storageKey: 'skating_tracker_entries',
+      // Meta fields shown at the top of the log form (always present)
+      meta: [
+        { key: 'date',   label: 'Date',            type: 'date' },
+        { key: 'month',  label: 'Training Month',  type: 'select',
+          options: ['Month 1 — Foundation','Month 2 — Build','Month 3 — Power','Month 4 — Performance'] },
+        { key: 'week',   label: 'Week #',           type: 'select',
+          options: ['Week 1','Week 2','Week 3','Week 4'] },
+      ],
+      // Cards shown in the log form
+      cards: [
+        {
+          title: '📏 Body Metrics', fullWidth: false,
+          fields: [
+            { key: 'weight',     label: 'Weight',                            type: 'number', placeholder: 'e.g. 130', step: 0.1 },
+            { key: 'weightUnit', label: 'Unit',                              type: 'select', options: ['lbs','kg'] },
+            { key: 'energy',     label: 'How energized do you feel? (1–10)', type: 'range',  min:1, max:10, default:7 },
+            { key: 'soreness',   label: 'Soreness level today (1–10)',       type: 'range',  min:1, max:10, default:3 },
+          ]
+        },
+        {
+          title: '💪 Strength', fullWidth: false,
+          fields: [
+            { key: 'pushups', label: 'Max full push-ups (in a row)',     type: 'number', placeholder: 'e.g. 5' },
+            { key: 'wallsit', label: 'Wall sit hold time (seconds)',     type: 'number', placeholder: 'e.g. 45' },
+            { key: 'plank',   label: 'Full plank hold time (seconds)',   type: 'number', placeholder: 'e.g. 30' },
+            { key: 'slsquat', label: 'Single-leg squat reps (each leg)', type: 'number', placeholder: 'e.g. 3'  },
+          ]
+        },
+        {
+          title: '⛸ Balance & Skating Skills', fullWidth: false,
+          fields: [
+            { key: 'balance', label: 'Single-leg balance, eyes closed (s)', type: 'number', placeholder: 'e.g. 12' },
+            { key: 'spiral',  label: 'Spiral hold without wall (s)',         type: 'number', placeholder: 'e.g. 8'  },
+            { key: 'sitspin', label: 'Sit-spin squat hold (s)',              type: 'number', placeholder: 'e.g. 5'  },
+            { key: 'lateral', label: 'Lateral balance hold (s)',             type: 'number', placeholder: 'e.g. 10' },
+          ]
+        },
+        {
+          title: '🤸 Flexibility', fullWidth: false,
+          fields: [
+            { key: 'straddle', label: 'Straddle sit — can you reach the floor?', type: 'select',
+              options: ['Not yet','Fingertips only','Palms down','Forearms on floor'] },
+            { key: 'hipflex',  label: 'Hip flexor stretch — how does it feel?',  type: 'select',
+              options: ['Very tight','Moderate tension','Mild stretch','Very open'] },
+            { key: 'pigeon',   label: 'Pigeon pose — how low to floor?',          type: 'select',
+              options: ['Hips far from floor','Need a pillow','Almost flat','Hips flat'] },
+          ]
+        },
+        {
+          title: '🫀 Cardio & Session Notes', fullWidth: true,
+          inlineGrid: 3,
+          fields: [
+            { key: 'cardio',  label: 'Cardio duration today (min)',  type: 'number', placeholder: 'e.g. 20' },
+            { key: 'day',     label: 'Session day completed',         type: 'select',
+              options: ['Monday','Tuesday','Wednesday','Thursday','Friday','Rest day'] },
+            { key: 'rating',  label: 'Overall session rating (1–10)', type: 'range', min:1, max:10, default:7 },
+            { key: 'notes',   label: 'Notes (how it felt, wins, anything!)', type: 'textarea',
+              placeholder: 'e.g. First time I held the spiral for 10 seconds!', fullWidth: true },
+          ]
+        },
+      ],
+      // Which numeric fields appear as personal-best cards
+      benchmarks: [
+        { key: 'pushups', label: 'Max Push-ups',        unit: 'reps',    color: '#4a90b8' },
+        { key: 'plank',   label: 'Longest Plank',       unit: 'seconds', color: '#6b5b9e' },
+        { key: 'wallsit', label: 'Longest Wall Sit',    unit: 'seconds', color: '#3a9e7a' },
+        { key: 'balance', label: 'Balance Eyes Closed', unit: 'seconds', color: '#c9a96e' },
+        { key: 'spiral',  label: 'Spiral Hold',         unit: 'seconds', color: '#c05050' },
+        { key: 'sitspin', label: 'Sit-Spin Squat',      unit: 'seconds', color: '#a8d8ea' },
+      ],
+      // Charts: each gets its own line graph
+      charts: [
+        { id: 'weight', title: 'Weight Over Time', fields: [
+            { key: 'weight', label: 'Weight', color: '#4a90b8', suffix: field => '' }
+          ]
+        },
+        { id: 'strength', title: 'Strength & Balance Progress', fields: [
+            { key: 'pushups', label: 'Push-ups',    color: '#4a90b8' },
+            { key: 'plank',   label: 'Plank (s)',   color: '#6b5b9e' },
+            { key: 'wallsit', label: 'Wall sit (s)',color: '#3a9e7a' },
+            { key: 'balance', label: 'Balance (s)', color: '#c9a96e' },
+            { key: 'spiral',  label: 'Spiral (s)',  color: '#c05050' },
+          ]
+        },
+      ],
+      // Which fields show up as stats in the history cards
+      historyStats: [
+        { key: 'weight',  label: 'Weight',           suffix: e => ` ${e.weightUnit||'lbs'}` },
+        { key: 'pushups', label: 'Push-ups',          suffix: () => '' },
+        { key: 'plank',   label: 'Plank',             suffix: () => 's' },
+        { key: 'wallsit', label: 'Wall sit',          suffix: () => 's' },
+        { key: 'balance', label: 'Balance',           suffix: () => 's' },
+        { key: 'spiral',  label: 'Spiral',            suffix: () => 's' },
+        { key: 'sitspin', label: 'Sit-spin',          suffix: () => 's' },
+        { key: 'cardio',  label: 'Cardio',            suffix: () => ' min' },
+        { key: 'energy',  label: 'Energy',            suffix: () => '/10' },
+        { key: 'rating',  label: 'Session rating',    suffix: () => '/10' },
+      ],
+      historySelectStats: ['straddle','hipflex','pigeon'],
+      metaColorKeys: ['#4a90b8','#6b5b9e','#3a9e7a','#c05050'],
+    },
+
+    // ── TO ADD A NEW TRACKER (e.g. "On-Ice Sessions"), copy the block above,
+    //    change id/label/storageKey, and update cards/benchmarks/charts/historyStats.
+    //    Example stub below — uncomment and fill in when you're ready:
+    //
+    // {
+    //   id: 'onice',
+    //   label: '⛸ On-Ice Sessions',
+    //   storageKey: 'skating_onice_entries',
+    //   meta: [
+    //     { key: 'date',    label: 'Date',          type: 'date' },
+    //     { key: 'lessonNum', label: 'Lesson #',    type: 'number', placeholder: 'e.g. 1' },
+    //   ],
+    //   cards: [
+    //     { title: '🛼 Elements Attempted', fullWidth: false, fields: [
+    //       { key: 'forwardGlide',  label: 'Forward glide (m)',    type: 'number', placeholder: 'e.g. 5' },
+    //       { key: 'twoFootStop',   label: 'Two-foot stop: clean?', type: 'select', options: ['Not yet','Sort of','Yes!'] },
+    //       { key: 'crossovers',    label: 'Crossovers attempted?', type: 'select', options: ['No','Yes'] },
+    //     ]},
+    //     { title: '💬 Session Notes', fullWidth: true, fields: [
+    //       { key: 'notes', label: 'Coach feedback / personal notes', type: 'textarea', placeholder: 'e.g. Held an edge for the first time!', fullWidth: true },
+    //     ]},
+    //   ],
+    //   benchmarks: [
+    //     { key: 'forwardGlide', label: 'Longest Glide', unit: 'metres', color: '#4a90b8' },
+    //   ],
+    //   charts: [
+    //     { id: 'glide', title: 'Forward Glide Distance', fields: [
+    //       { key: 'forwardGlide', label: 'Glide (m)', color: '#4a90b8' },
+    //     ]},
+    //   ],
+    //   historyStats: [
+    //     { key: 'forwardGlide', label: 'Forward glide', suffix: () => 'm' },
+    //   ],
+    //   historySelectStats: ['twoFootStop','crossovers'],
+    //   metaColorKeys: ['#4a90b8','#6b5b9e','#3a9e7a','#c05050'],
+    // },
+  ];
+
+  // =========================================================
+  // ENGINE — reads TRACKER_CONFIGS, builds and manages all UI
+  // =========================================================
+
+  let activeTrackerIdx = 0;
+
+  function getConfig() { return TRACKER_CONFIGS[activeTrackerIdx]; }
+
+  // ----- Storage -----
+  function getEntries(cfg) {
+    cfg = cfg || getConfig();
+    try { return JSON.parse(localStorage.getItem(cfg.storageKey) || '[]'); } catch { return []; }
+  }
+  function saveEntries(entries, cfg) {
+    cfg = cfg || getConfig();
+    localStorage.setItem(cfg.storageKey, JSON.stringify(entries));
+  }
+
+  // ----- Build the full tracker UI from config -----
+  function buildTrackerUI() {
+    const cfg = getConfig();
+
+    // Type nav tabs
+    const nav = document.getElementById('tracker-type-nav');
+    nav.innerHTML = TRACKER_CONFIGS.map((c, i) =>
+      `<button class="month-btn ${i === activeTrackerIdx ? 'active' : ''}"
+        style="--accent-color:#a8d8ea"
+        onclick="switchTracker(${i})">${c.label}</button>`
+    ).join('');
+
+    // Sub-tabs
+    const container = document.getElementById('tracker-dynamic-container');
+    container.innerHTML = `
+      <div style="display:flex;gap:4px;border-bottom:1px solid rgba(168,216,234,0.1);margin-bottom:32px;">
+        <button class="month-btn active" id="tab-log"        style="--accent-color:#a8d8ea" onclick="showTrackerTab('log')">Log Entry</button>
+        <button class="month-btn"        id="tab-history"    style="--accent-color:#a8d8ea" onclick="showTrackerTab('history')">History</button>
+        <button class="month-btn"        id="tab-benchmarks" style="--accent-color:#a8d8ea" onclick="showTrackerTab('benchmarks')">Benchmarks</button>
+      </div>
+      <div id="tracker-log">${buildLogForm(cfg)}</div>
+      <div id="tracker-history"   style="display:none;">${buildHistoryShell()}</div>
+      <div id="tracker-benchmarks" style="display:none;">${buildBenchmarksShell(cfg)}</div>`;
+
+    // Set default date
+    const dateEl = document.getElementById('field-date');
+    if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+  }
+
+  function switchTracker(idx) {
+    activeTrackerIdx = idx;
+    buildTrackerUI();
+  }
+
+  function showTrackerTab(tab) {
+    ['log','history','benchmarks'].forEach(t => {
+      document.getElementById('tracker-' + t).style.display = t === tab ? 'block' : 'none';
+      document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    });
+    if (tab === 'history')    renderHistory();
+    if (tab === 'benchmarks') renderBenchmarks();
+  }
+
+  // ----- Build log form HTML from config -----
+  function buildLogForm(cfg) {
+    // Meta row
+    const metaFields = cfg.meta.map(f => `
+      <div class="tracker-field">${fieldLabel(f)}${fieldInput(f)}</div>`).join('');
+    const metaRow = `<div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(${cfg.meta.length},1fr);gap:16px;">${metaFields}</div>`;
+
+    // Cards
+    const cards = cfg.cards.map(card => {
+      const style = card.fullWidth ? 'grid-column:1/-1;' : '';
+      let fieldsHTML;
+      if (card.inlineGrid) {
+        // Split fields: first inlineGrid in a sub-grid, rest full width
+        const inline = card.fields.slice(0, card.inlineGrid);
+        const rest   = card.fields.slice(card.inlineGrid);
+        fieldsHTML =
+          `<div style="display:grid;grid-template-columns:repeat(${card.inlineGrid},1fr);gap:16px;">` +
+          inline.map(f => `<div class="tracker-field">${fieldLabel(f)}${fieldInput(f)}</div>`).join('') +
+          `</div>` +
+          rest.map(f => `<div class="tracker-field" style="margin-top:8px;">${fieldLabel(f)}${fieldInput(f)}</div>`).join('');
+      } else {
+        fieldsHTML = card.fields.map(f => `<div class="tracker-field">${fieldLabel(f)}${fieldInput(f)}</div>`).join('');
+      }
+      return `<div class="tracker-card" style="${style}">
+        <div class="tracker-card-title">${card.title}</div>${fieldsHTML}</div>`;
+    }).join('');
+
+    return `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        ${metaRow}${cards}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:24px;align-items:center;flex-wrap:wrap;">
+        <button class="save-btn" onclick="saveEntry()">💾 Save Entry</button>
+        <button class="clear-btn" onclick="clearForm()">Clear Form</button>
+        <span id="save-confirm" style="font-family:'DM Mono',monospace;font-size:12px;color:#3a9e7a;opacity:0;transition:opacity 0.5s;">✓ Entry saved!</span>
+      </div>`;
+  }
+
+  function fieldLabel(f) {
+    return `<label>${f.label}</label>`;
+  }
+
+  function fieldInput(f) {
+    const id = `field-${f.key}`;
+    switch (f.type) {
+      case 'date':
+        return `<input type="date" id="${id}">`;
+      case 'number':
+        return `<input type="number" id="${id}" placeholder="${f.placeholder||''}" min="0" ${f.step ? `step="${f.step}"` : ''}>`;
+      case 'select': {
+        const opts = (f.options||[]).map(o => `<option value="${o}">${o}</option>`).join('');
+        return `<select id="${id}"><option value="">— select —</option>${opts}</select>`;
+      }
+      case 'range': {
+        const def = f.default || 5;
+        const valId = `val-${f.key}`;
+        return `<input type="range" id="${id}" min="${f.min||1}" max="${f.max||10}" value="${def}"
+          oninput="document.getElementById('${valId}').textContent=this.value">
+          <span id="${valId}" class="range-val">${def}</span>`;
+      }
+      case 'textarea':
+        return `<textarea id="${id}" rows="3" placeholder="${f.placeholder||''}"></textarea>`;
+      default:
+        return `<input type="text" id="${id}">`;
+    }
+  }
+
+  // ----- Build history shell HTML -----
+  function buildHistoryShell() {
+    return `
+      <div style="background:rgba(168,216,234,0.04);border:1px solid rgba(168,216,234,0.1);border-radius:6px;padding:16px 20px;margin-bottom:24px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ice-deep);margin-bottom:4px;">Data Backup</div>
+          <div style="font-size:13px;font-style:italic;color:var(--muted);">Export your data as a JSON file to back it up or move to a new browser.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="save-btn" onclick="exportData()" style="padding:9px 18px;font-size:11px;">⬇ Export JSON</button>
+          <button class="save-btn" onclick="document.getElementById('import-file').click()" style="padding:9px 18px;font-size:11px;background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.3);color:var(--gold-light);">⬆ Import JSON</button>
+          <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+          <span id="import-confirm" style="font-family:'DM Mono',monospace;font-size:11px;color:#3a9e7a;opacity:0;transition:opacity 0.5s;">✓ Imported!</span>
+          <span id="import-error"   style="font-family:'DM Mono',monospace;font-size:11px;color:#e08080;opacity:0;transition:opacity 0.5s;">✕ Invalid file</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">All Logged Sessions</div>
+        <button id="clear-all-btn" class="clear-btn" onclick="clearAllData()" style="background:rgba(192,80,80,0.1);border-color:rgba(192,80,80,0.3);color:#e08080;">🗑 Clear All Data</button>
+      </div>
+      <div id="history-list"></div>
+      <div id="history-empty" style="text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">No entries yet. Log your first session above!</div>`;
+  }
+
+  // ----- Build benchmarks shell HTML from config -----
+  function buildBenchmarksShell(cfg) {
+    const pbCards = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;" id="pb-grid"></div>`;
+    const charts  = cfg.charts.map(ch => `
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:32px 0 16px;">${ch.title}</div>
+      <div id="${ch.id}-chart-wrap" style="background:rgba(17,34,64,0.6);border:1px solid rgba(168,216,234,0.1);border-radius:6px;padding:24px;">
+        <canvas id="${ch.id}-chart"></canvas>
+        <div id="${ch.id}-empty" style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;display:none;">Log data to see this chart.</div>
+      </div>`).join('');
+    return `<div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:24px;">Personal Bests & Progress Over Time</div>
+      ${pbCards}${charts}`;
+  }
+
+  // ----- Save entry -----
+  function saveEntry() {
+    const cfg   = getConfig();
+    const entry = { id: Date.now() };
+    // Collect meta fields
+    cfg.meta.forEach(f => {
+      const el = document.getElementById(`field-${f.key}`);
+      if (el) entry[f.key] = el.value;
+    });
+    // Collect card fields
+    cfg.cards.forEach(card => {
+      card.fields.forEach(f => {
+        const el = document.getElementById(`field-${f.key}`);
+        if (el) entry[f.key] = el.value;
+      });
+    });
+
+    const entries = getEntries();
+    entries.unshift(entry);
+    saveEntries(entries);
+
+    const confirm = document.getElementById('save-confirm');
+    confirm.style.opacity = '1';
+    setTimeout(() => confirm.style.opacity = '0', 2500);
+  }
+
+  // ----- Clear form -----
+  function clearForm() {
+    const cfg = getConfig();
+    const allFields = [...cfg.meta, ...cfg.cards.flatMap(c => c.fields)];
+    allFields.forEach(f => {
+      const el = document.getElementById(`field-${f.key}`);
+      if (!el) return;
+      if (f.type === 'range') {
+        el.value = f.default || 5;
+        const valEl = document.getElementById(`val-${f.key}`);
+        if (valEl) valEl.textContent = f.default || 5;
+      } else if (f.type === 'date') {
+        el.value = new Date().toISOString().split('T')[0];
+      } else {
+        el.value = '';
+      }
+    });
+  }
+
+  // ----- Delete / clear -----
+  function clearAllData() {
+    const btn = document.getElementById('clear-all-btn');
+    if (btn.dataset.confirming === 'true') {
+      localStorage.removeItem(getConfig().storageKey);
+      btn.textContent = '🗑 Clear All Data';
+      btn.dataset.confirming = 'false';
+      btn.style.background = 'rgba(192,80,80,0.1)';
+      renderHistory();
+      renderBenchmarks();
+    } else {
+      btn.textContent = '⚠ Click again to confirm';
+      btn.dataset.confirming = 'true';
+      btn.style.background = 'rgba(192,80,80,0.25)';
+      setTimeout(() => {
+        if (btn.dataset.confirming === 'true') {
+          btn.textContent = '🗑 Clear All Data';
+          btn.dataset.confirming = 'false';
+          btn.style.background = 'rgba(192,80,80,0.1)';
+        }
+      }, 4000);
+    }
+  }
+
+  function deleteEntry(id) {
+    const entries = getEntries().filter(e => e.id !== id);
+    saveEntries(entries);
+    renderHistory();
+    renderBenchmarks();
+  }
+
+  // ----- Format date -----
+  function fmtDate(str) {
+    if (!str) return '—';
+    return new Date(str + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  // ----- Render history -----
+  function renderHistory() {
+    const cfg     = getConfig();
+    const entries = getEntries();
+    const list    = document.getElementById('history-list');
+    const empty   = document.getElementById('history-empty');
+    if (!list) return;
+
+    if (entries.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    list.innerHTML = entries.map(e => {
+      // Numeric + select stats from config
+      const stats = cfg.historyStats
+        .filter(s => e[s.key])
+        .map(s => `${s.label}: <span>${e[s.key]}${s.suffix(e)}</span>`);
+
+      const selectStats = (cfg.historySelectStats || [])
+        .filter(k => e[k])
+        .map(k => `${k}: <span>${e[k]}</span>`);
+
+      // Meta tag color
+      const metaMonthVal = e.month ? parseInt(e.month) - 1 : 0;
+      const color = (cfg.metaColorKeys || [])[metaMonthVal] || '#4a90b8';
+
+      // Find the month/week meta fields for the tag
+      const monthField = cfg.meta.find(f => f.key === 'month');
+      const weekField  = cfg.meta.find(f => f.key === 'week');
+      const metaTag    = (monthField && e.month) ? `M${e.month} · W${e.week||'?'}` : fmtDate(e.date);
+
+      return `<div class="history-entry">
+        <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete entry">✕</button>
+        <div class="history-entry-header">
+          <div class="history-entry-date">${fmtDate(e.date)}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div class="history-entry-tag" style="color:${color};border-color:${color}40;">${metaTag}</div>
+            ${e.day ? `<div class="history-entry-tag">${e.day}</div>` : ''}
+          </div>
+        </div>
+        ${stats.length ? `<div class="history-entry-stats">${stats.map(s=>`<div class="history-stat">${s}</div>`).join('')}</div>` : ''}
+        ${selectStats.length ? `<div class="history-entry-stats" style="margin-top:8px;">${selectStats.map(s=>`<div class="history-stat">${s}</div>`).join('')}</div>` : ''}
+        ${e.notes ? `<div class="history-notes">"${e.notes}"</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // ----- Render benchmarks -----
+  function renderBenchmarks() {
+    const cfg     = getConfig();
+    const entries = getEntries().slice().reverse();
+    const pbGrid  = document.getElementById('pb-grid');
+    if (!pbGrid) return;
+
+    // Personal best cards
+    pbGrid.innerHTML = cfg.benchmarks.map(b => {
+      const best = entries.reduce((max, e) => {
+        const v = parseFloat(e[b.key]);
+        return (!isNaN(v) && v > max) ? v : max;
+      }, 0);
+      const has = best > 0;
+      return `<div class="pb-card">
+        <div class="pb-card-label">${b.label}</div>
+        <div class="pb-card-value" style="color:${has ? b.color : 'var(--muted)'};">${has ? best : '—'}</div>
+        <div class="pb-card-unit">${has ? b.unit : 'no data yet'}</div>
+      </div>`;
+    }).join('');
+
+    // Charts
+    cfg.charts.forEach(ch => {
+      const datasets = ch.fields.map(f => ({
+        key: f.key, label: f.label, color: f.color,
+        points: entries
+          .filter(e => e[f.key] && !isNaN(parseFloat(e[f.key])))
+          .map(e => ({ label: fmtDate(e.date).replace(/,.*/, ''), v: parseFloat(e[f.key]) }))
+      })).filter(d => d.points.length >= 1);
+
+      const wrapEl = document.getElementById(`${ch.id}-chart-wrap`);
+      if (!wrapEl) return;
+      makeSVGLineChart({
+        wrap: wrapEl,
+        canvasId: `${ch.id}-chart`,
+        emptyId:  `${ch.id}-empty`,
+        datasets,
+        height: 200,
+        showLegend: ch.fields.length > 1,
+      });
+    });
+  }
+
+  // ----- Init on load -----
+  window.addEventListener('DOMContentLoaded', () => { buildTrackerUI(); });
+
+  // ===== EXPORT / IMPORT =====
+
+  function exportData() {
+    const entries = getEntries();
+    if (entries.length === 0) {
+      alert('No data to export yet — log some sessions first!');
+      return;
+    }
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      version: 1,
+      entries
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `skating-data-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+
+        // Accept both { entries: [...] } wrapper format and a bare array
+        const incoming = Array.isArray(parsed) ? parsed
+                       : (Array.isArray(parsed.entries) ? parsed.entries : null);
+
+        if (!incoming) throw new Error('Unrecognised format');
+
+        // Validate each entry has at minimum an id and date
+        const valid = incoming.filter(en => en.id && en.date);
+        if (valid.length === 0) throw new Error('No valid entries found');
+
+        // Merge: keep existing entries, add imported ones that aren't already present
+        const existing   = getEntries();
+        const existingIds = new Set(existing.map(en => en.id));
+        const merged     = [...existing];
+        let addedCount   = 0;
+        valid.forEach(en => {
+          if (!existingIds.has(en.id)) { merged.push(en); addedCount++; }
+        });
+
+        // Sort merged by date descending (newest first)
+        merged.sort((a, b) => new Date(b.date) - new Date(a.date));
+        saveEntries(merged);
+
+        // Flash confirmation
+        const confirm = document.getElementById('import-confirm');
+        confirm.textContent = `✓ ${addedCount} new entr${addedCount === 1 ? 'y' : 'ies'} imported!`;
+        confirm.style.opacity = '1';
+        setTimeout(() => { confirm.style.opacity = '0'; }, 3000);
+
+        // Refresh views
+        renderHistory();
+        renderBenchmarks();
+
+      } catch (err) {
+        const errEl = document.getElementById('import-error');
+        errEl.style.opacity = '1';
+        setTimeout(() => { errEl.style.opacity = '0'; }, 3000);
+      }
+
+      // Reset file input so the same file can be re-imported if needed
+      event.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  // ===== SVG LINE GRAPH HELPERS =====
+
+  function makeSVGLineChart({ wrap, canvasId, emptyId, datasets, height = 180, showLegend = true }) {
+    const canvas = document.getElementById(canvasId);
+    const empty  = document.getElementById(emptyId);
+    canvas.style.display = 'none';
+    const existing = wrap.querySelector('.svg-chart-wrap');
+    if (existing) existing.remove();
+
+    // Check at least one dataset has 2+ points
+    const valid = datasets.filter(d => d.points.length >= 1);
+    if (valid.length === 0) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    const W = wrap.clientWidth || 700;
+    const PAD = { top: 24, right: 24, bottom: 48, left: 48 };
+    const cW = W - PAD.left - PAD.right;
+    const cH = height - PAD.top - PAD.bottom;
+
+    // Gather all values to compute global y-range
+    const allVals = valid.flatMap(d => d.points.map(p => p.v));
+    const rawMin = Math.min(...allVals);
+    const rawMax = Math.max(...allVals);
+    const range  = rawMax - rawMin;
+    // Pad by 20% of range; if all values are identical, pad by 5% of the value itself
+    const pad    = range > 0 ? range * 0.2 : (rawMin * 0.05 || 0.5);
+    const yMin   = rawMin - pad;
+    const yMax   = rawMax + pad;
+
+    // Work out how many decimal places to show on y-axis labels
+    // so that small ranges (e.g. 100.0–100.7) don't all round to the same number
+    const tickRange  = yMax - yMin;
+    const magnitude  = tickRange / 5;  // approx gap between ticks
+    const decimals   = magnitude >= 10  ? 0
+                     : magnitude >= 1   ? 1
+                     : magnitude >= 0.1 ? 2
+                     :                    3;
+    const fmtTick = v => v.toFixed(decimals);
+
+    // Longest x-labels list (for axis)
+    const longestDs = valid.reduce((a,b) => a.points.length >= b.points.length ? a : b);
+    const xLabels   = longestDs.points.map(p => p.label);
+    const xCount    = xLabels.length;
+
+    const xPos = i  => PAD.left + (xCount <= 1 ? cW/2 : (i / (xCount - 1)) * cW);
+    const yPos = v  => PAD.top  + cH - ((v - yMin) / (yMax - yMin)) * cH;
+
+    // Y-axis gridlines
+    const yTicks = 5;
+    let gridLines = '', yAxisLabels = '';
+    for (let i = 0; i <= yTicks; i++) {
+      const v = yMin + (yMax - yMin) * (i / yTicks);
+      const y = yPos(v);
+      gridLines += `<line x1="${PAD.left}" y1="${y}" x2="${PAD.left+cW}" y2="${y}" stroke="rgba(168,216,234,0.07)" stroke-width="1"/>`;
+      yAxisLabels += `<text x="${PAD.left - 8}" y="${y + 4}" fill="rgba(168,216,234,0.35)" font-family="DM Mono,monospace" font-size="10" text-anchor="end">${fmtTick(v)}</text>`;
+    }
+
+    // X-axis labels
+    let xAxisLabels = '';
+    const step = xCount <= 8 ? 1 : Math.ceil(xCount / 8);
+    for (let i = 0; i < xCount; i += step) {
+      xAxisLabels += `<text x="${xPos(i)}" y="${PAD.top + cH + 20}" fill="rgba(168,216,234,0.35)" font-family="DM Mono,monospace" font-size="9" text-anchor="middle">${xLabels[i]}</text>`;
+    }
+
+    // Build each dataset path + dots + tooltip targets
+    let paths = '', dots = '', areas = '', tooltipTargets = '';
+
+    valid.forEach(ds => {
+      const pts = ds.points;
+      if (pts.length === 0) return;
+
+      // Smooth cubic bezier path
+      const coords = pts.map((p, i) => {
+        // Find the index in longestDs for alignment
+        const xi = xLabels.indexOf(p.label);
+        const x  = xi >= 0 ? xPos(xi) : xPos(i);
+        return { x, y: yPos(p.v), v: p.v, label: p.label };
+      });
+
+      // Area fill path
+      let areaD = `M ${coords[0].x} ${PAD.top + cH}`;
+      areaD    += ` L ${coords[0].x} ${coords[0].y}`;
+      if (coords.length === 1) {
+        areaD += ` L ${coords[0].x} ${PAD.top + cH} Z`;
+      } else {
+        for (let i = 1; i < coords.length; i++) {
+          const prev = coords[i-1], curr = coords[i];
+          const cpx1 = prev.x + (curr.x - prev.x) / 3;
+          const cpx2 = curr.x - (curr.x - prev.x) / 3;
+          areaD += ` C ${cpx1} ${prev.y}, ${cpx2} ${curr.y}, ${curr.x} ${curr.y}`;
+        }
+        areaD += ` L ${coords[coords.length-1].x} ${PAD.top + cH} Z`;
+      }
+
+      // Line path
+      let lineD = `M ${coords[0].x} ${coords[0].y}`;
+      if (coords.length === 1) {
+        // just a dot
+      } else {
+        for (let i = 1; i < coords.length; i++) {
+          const prev = coords[i-1], curr = coords[i];
+          const cpx1 = prev.x + (curr.x - prev.x) / 3;
+          const cpx2 = curr.x - (curr.x - prev.x) / 3;
+          lineD += ` C ${cpx1} ${prev.y}, ${cpx2} ${curr.y}, ${curr.x} ${curr.y}`;
+        }
+      }
+
+      const gradId = `grad_${ds.key || ds.label.replace(/\W/g,'_')}`;
+
+      areas += `
+        <defs>
+          <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="${ds.color}" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="${ds.color}" stop-opacity="0.01"/>
+          </linearGradient>
+        </defs>
+        <path d="${areaD}" fill="url(#${gradId})"/>`;
+
+      paths += `<path d="${lineD}" fill="none" stroke="${ds.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`;
+
+      coords.forEach(c => {
+        dots += `<circle cx="${c.x}" cy="${c.y}" r="4" fill="${ds.color}" stroke="#0b1a2e" stroke-width="2"/>`;
+        // Invisible wide tooltip hit area
+        tooltipTargets += `
+          <g class="chart-point" data-val="${c.v}" data-label="${c.label}" data-metric="${ds.label}" data-color="${ds.color}">
+            <circle cx="${c.x}" cy="${c.y}" r="14" fill="transparent" style="cursor:pointer"/>
+          </g>`;
+      });
+    });
+
+    // Tooltip element
+    const tooltipId = `tt_${canvasId}`;
+
+    // Legend
+    let legendHTML = '';
+    if (showLegend && valid.length > 1) {
+      legendHTML = `<div class="chart-legend" style="margin-top:12px;">` +
+        valid.map(d => `<div class="chart-legend-item"><div class="chart-legend-dot" style="background:${d.color}"></div>${d.label}</div>`).join('') +
+        `</div>`;
+    }
+
+    const svgHTML = `
+      <div class="svg-chart-wrap" style="position:relative;">
+        <svg width="100%" viewBox="0 0 ${W} ${height}" style="overflow:visible; display:block;">
+          ${gridLines}
+          <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${PAD.top+cH}" stroke="rgba(168,216,234,0.15)" stroke-width="1"/>
+          <line x1="${PAD.left}" y1="${PAD.top+cH}" x2="${PAD.left+cW}" y2="${PAD.top+cH}" stroke="rgba(168,216,234,0.15)" stroke-width="1"/>
+          ${yAxisLabels}
+          ${xAxisLabels}
+          ${areas}
+          ${paths}
+          ${dots}
+          ${tooltipTargets}
+        </svg>
+        <div id="${tooltipId}" style="
+          display:none; position:absolute; pointer-events:none;
+          background:rgba(11,26,46,0.95); border:1px solid rgba(168,216,234,0.25);
+          border-radius:5px; padding:8px 14px; font-family:DM Mono,monospace;
+          font-size:11px; color:#e8f4f8; white-space:nowrap; z-index:99;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        "></div>
+        ${legendHTML}
+      </div>`;
+
+    wrap.insertAdjacentHTML('beforeend', svgHTML);
+
+    // Tooltip interaction
+    const ttEl = document.getElementById(tooltipId);
+    wrap.querySelectorAll('.chart-point').forEach(pt => {
+      pt.addEventListener('mouseenter', e => {
+        const rect = wrap.getBoundingClientRect();
+        const ptRect = pt.querySelector('circle').getBoundingClientRect();
+        const metric = pt.dataset.metric;
+        const val    = pt.dataset.val;
+        const label  = pt.dataset.label;
+        const color  = pt.dataset.color;
+        ttEl.innerHTML = `<span style="color:${color}">●</span> <strong style="color:#fff">${val}</strong> <span style="color:rgba(168,216,234,0.6)">${metric}</span><br><span style="color:rgba(168,216,234,0.4);font-size:10px;">${label}</span>`;
+        ttEl.style.display = 'block';
+        const x = ptRect.left - rect.left + 10;
+        const y = ptRect.top  - rect.top  - 60;
+        ttEl.style.left = Math.max(0, Math.min(x, wrap.clientWidth - 160)) + 'px';
+        ttEl.style.top  = Math.max(0, y) + 'px';
+      });
+      pt.addEventListener('mouseleave', () => { ttEl.style.display = 'none'; });
+    });
+  }
+
+  // (Chart rendering is now handled generically by renderBenchmarks via makeSVGLineChart)
+</script>
+
+</body>
+</html>
