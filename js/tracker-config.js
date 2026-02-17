@@ -83,26 +83,26 @@ const TRACKER_CONFIGS = [
 
     // Personal-best cards shown in Benchmarks tab
     benchmarks: [
-      { key: 'pushups', label: 'Max Push-ups',        unit: 'reps',    color: '#4a90b8' },
-      { key: 'plank',   label: 'Longest Plank',       unit: 'seconds', color: '#6b5b9e' },
-      { key: 'wallsit', label: 'Longest Wall Sit',    unit: 'seconds', color: '#3a9e7a' },
+      { key: 'pushups', label: 'Max Push-ups',        unit: 'reps',    color: '#8b5fbf' },
+      { key: 'plank',   label: 'Longest Plank',       unit: 'seconds', color: '#9e7ab8' },
+      { key: 'wallsit', label: 'Longest Wall Sit',    unit: 'seconds', color: '#b89de0' },
       { key: 'balance', label: 'Balance Eyes Closed', unit: 'seconds', color: '#c9a96e' },
-      { key: 'spiral',  label: 'Spiral Hold',         unit: 'seconds', color: '#c05050' },
+      { key: 'spiral',  label: 'Spiral Hold',         unit: 'seconds', color: '#c070a0' },
       { key: 'sitspin', label: 'Sit-Spin Squat',      unit: 'seconds', color: '#a8d8ea' },
     ],
 
     // Line graphs shown in Benchmarks tab
     charts: [
       { id: 'weight', title: 'Weight Over Time', fields: [
-          { key: 'weight', label: 'Weight', color: '#4a90b8' },
+          { key: 'weight', label: 'Weight', color: '#8b5fbf' },
         ]
       },
       { id: 'strength', title: 'Strength & Balance Progress', fields: [
-          { key: 'pushups', label: 'Push-ups',    color: '#4a90b8' },
-          { key: 'plank',   label: 'Plank (s)',   color: '#6b5b9e' },
-          { key: 'wallsit', label: 'Wall sit (s)',color: '#3a9e7a' },
+          { key: 'pushups', label: 'Push-ups',    color: '#8b5fbf' },
+          { key: 'plank',   label: 'Plank (s)',   color: '#9e7ab8' },
+          { key: 'wallsit', label: 'Wall sit (s)',color: '#b89de0' },
           { key: 'balance', label: 'Balance (s)', color: '#c9a96e' },
-          { key: 'spiral',  label: 'Spiral (s)',  color: '#c05050' },
+          { key: 'spiral',  label: 'Spiral (s)',  color: '#c070a0' },
         ]
       },
     ],
@@ -125,7 +125,90 @@ const TRACKER_CONFIGS = [
     historySelectStats: ['straddle','hipflex','pigeon'],
 
     // Colors for the month tag in history (one per meta month option)
-    metaColorKeys: ['#4a90b8','#6b5b9e','#3a9e7a','#c05050'],
+    metaColorKeys: ['#8b5fbf','#9e7ab8','#b89de0','#c070a0'],
+  },
+
+
+  // ── NUTRITION TRACKER ───────────────────────────────────────
+  {
+    id: 'nutrition',
+    label: '🥗 Nutrition',
+    storageKey: 'skating_nutrition_entries',
+
+    meta: [
+      { key: 'date', label: 'Date', type: 'date' },
+    ],
+
+    cards: [
+      {
+        title: '🍽 Daily Macros', fullWidth: false,
+        fields: [
+          { key: 'calories', label: 'Total calories', type: 'number', placeholder: 'e.g. 1800' },
+          { key: 'protein',  label: 'Protein (g)',   type: 'number', placeholder: 'e.g. 120' },
+          { key: 'carbs',    label: 'Carbs (g)',     type: 'number', placeholder: 'e.g. 180' },
+          { key: 'fats',     label: 'Fats (g)',      type: 'number', placeholder: 'e.g. 60' },
+        ]
+      },
+      {
+        title: '💧 Hydration & Energy', fullWidth: false,
+        fields: [
+          { key: 'water',  label: 'Water intake (oz or mL)', type: 'number', placeholder: 'e.g. 80' },
+          { key: 'waterUnit', label: 'Unit', type: 'select', options: ['oz','mL'] },
+          { key: 'energyLevel', label: 'Energy level (1–10)', type: 'range', min:1, max:10, default:7 },
+          { key: 'hungerLevel', label: 'Hunger level (1–10)', type: 'range', min:1, max:10, default:5 },
+        ]
+      },
+      {
+        title: '📝 Notes', fullWidth: true,
+        fields: [
+          { key: 'notes', label: 'Meal highlights, cravings, how you felt', type: 'textarea',
+            placeholder: 'e.g. Had a great pre-workout meal, felt strong during training', fullWidth: true },
+        ]
+      },
+    ],
+
+    benchmarks: [
+      { key: 'avgCalories', label: 'Avg Daily Calories', unit: 'kcal', color: '#8b5fbf' },
+      { key: 'avgProtein',  label: 'Avg Protein',        unit: 'g',    color: '#9e7ab8' },
+    ],
+
+    charts: [
+      { id: 'cals', title: 'Calorie Intake Over Time', fields: [
+          { key: 'calories', label: 'Calories', color: '#8b5fbf' },
+        ]
+      },
+      { id: 'macros', title: 'Macronutrient Balance', fields: [
+          { key: 'protein', label: 'Protein (g)', color: '#c070a0' },
+          { key: 'carbs',   label: 'Carbs (g)',   color: '#9e7ab8' },
+          { key: 'fats',    label: 'Fats (g)',    color: '#b89de0' },
+        ]
+      },
+    ],
+
+    historyStats: [
+      { key: 'calories', label: 'Calories', suffix: () => ' kcal' },
+      { key: 'protein',  label: 'Protein',  suffix: () => 'g' },
+      { key: 'carbs',    label: 'Carbs',    suffix: () => 'g' },
+      { key: 'fats',     label: 'Fats',     suffix: () => 'g' },
+      { key: 'water',    label: 'Water',    suffix: e => ` ${e.waterUnit||'oz'}` },
+      { key: 'energyLevel', label: 'Energy', suffix: () => '/10' },
+    ],
+
+    historySelectStats: [],
+    metaColorKeys: ['#8b5fbf'],
+
+    // Nutrition-specific: settings for macro calculations
+    hasSettings: true,
+    settingsFields: [
+      { key: 'age',       label: 'Age',             type: 'number', placeholder: 'e.g. 25' },
+      { key: 'sex',       label: 'Sex',             type: 'select', options: ['Female','Male'] },
+      { key: 'heightFt',  label: 'Height (ft)',     type: 'number', placeholder: 'e.g. 5' },
+      { key: 'heightIn',  label: 'Height (in)',     type: 'number', placeholder: 'e.g. 6' },
+      { key: 'activityLevel', label: 'Activity Level', type: 'select',
+        options: ['Sedentary (little/no exercise)','Lightly active (1-3 days/week)','Moderately active (3-5 days/week)','Very active (6-7 days/week)','Extremely active (athlete)'] },
+      { key: 'goal',      label: 'Goal',            type: 'select',
+        options: ['Lose weight','Maintain weight','Gain muscle'] },
+    ],
   },
 
 
@@ -153,17 +236,17 @@ const TRACKER_CONFIGS = [
   //     ]},
   //   ],
   //   benchmarks: [
-  //     { key: 'forwardGlide', label: 'Longest Glide', unit: 'metres', color: '#4a90b8' },
+  //     { key: 'forwardGlide', label: 'Longest Glide', unit: 'metres', color: '#8b5fbf' },
   //   ],
   //   charts: [
   //     { id: 'glide', title: 'Forward Glide Distance', fields: [
-  //       { key: 'forwardGlide', label: 'Glide (m)', color: '#4a90b8' },
+  //       { key: 'forwardGlide', label: 'Glide (m)', color: '#8b5fbf' },
   //     ]},
   //   ],
   //   historyStats: [
   //     { key: 'forwardGlide', label: 'Forward glide', suffix: () => 'm' },
   //   ],
   //   historySelectStats: ['twoFootStop','crossovers'],
-  //   metaColorKeys: ['#4a90b8'],
+  //   metaColorKeys: ['#8b5fbf'],
   // },
 ];

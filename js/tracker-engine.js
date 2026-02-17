@@ -32,19 +32,27 @@ function buildTrackerUI() {
 
   // Sub-tabs + panels
   const container = document.getElementById('tracker-dynamic-container');
+  const settingsTab = cfg.hasSettings ? `<button class="month-btn" id="tab-settings" style="--accent-color:#a8d8ea" onclick="showTrackerTab('settings')">Settings</button>` : '';
+  const settingsPanel = cfg.hasSettings ? `<div id="tracker-settings" style="display:none;">${buildSettingsShell(cfg)}</div>` : '';
+
   container.innerHTML = `
-    <div style="display:flex;gap:4px;border-bottom:1px solid rgba(168,216,234,0.1);margin-bottom:32px;">
+    <div style="display:flex;gap:4px;border-bottom:1px solid rgba(184,157,224,0.1);margin-bottom:32px;">
       <button class="month-btn active" id="tab-log"        style="--accent-color:#a8d8ea" onclick="showTrackerTab('log')">Log Entry</button>
       <button class="month-btn"        id="tab-history"    style="--accent-color:#a8d8ea" onclick="showTrackerTab('history')">History</button>
       <button class="month-btn"        id="tab-benchmarks" style="--accent-color:#a8d8ea" onclick="showTrackerTab('benchmarks')">Benchmarks</button>
+      ${settingsTab}
     </div>
     <div id="tracker-log">${buildLogForm(cfg)}</div>
-    <div id="tracker-history"    style="display:none;">${buildHistoryShell()}</div>
-    <div id="tracker-benchmarks" style="display:none;">${buildBenchmarksShell(cfg)}</div>`;
+    <div id="tracker-history"   style="display:none;">${buildHistoryShell()}</div>
+    <div id="tracker-benchmarks" style="display:none;">${buildBenchmarksShell(cfg)}</div>
+    ${settingsPanel}`;
 
   // Set today's date as default
   const dateEl = document.getElementById('field-date');
   if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+
+  // Load settings if this tracker has them
+  if (cfg.hasSettings) loadSettings();
 }
 
 function switchTracker(idx) {
@@ -53,12 +61,19 @@ function switchTracker(idx) {
 }
 
 function showTrackerTab(tab) {
-  ['log','history','benchmarks'].forEach(t => {
-    document.getElementById('tracker-' + t).style.display = t === tab ? 'block' : 'none';
-    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  const cfg = getConfig();
+  const tabs = ['log','history','benchmarks'];
+  if (cfg.hasSettings) tabs.push('settings');
+  
+  tabs.forEach(t => {
+    const el = document.getElementById('tracker-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+    const tabEl = document.getElementById('tab-' + t);
+    if (tabEl) tabEl.classList.toggle('active', t === tab);
   });
   if (tab === 'history')    renderHistory();
   if (tab === 'benchmarks') renderBenchmarks();
+  if (tab === 'settings')   renderMacroCalc();
 }
 
 // ── Build log form HTML ───────────────────────────────────────
@@ -265,10 +280,14 @@ function renderHistory() {
       .filter(k => e[k])
       .map(k => `${k}: <span>${e[k]}</span>`);
 
-    const metaMonthVal = e.month ? parseInt(e.month) - 1 : 0;
-    const color        = (cfg.metaColorKeys || [])[metaMonthVal] || '#4a90b8';
+    // Extract month number from "Month 1 — Foundation" format
+    const monthNum = e.month ? parseInt(e.month.toString().match(/\d+/)?.[0] || '0') : 0;
+    const metaMonthVal = monthNum - 1;
+    const color        = (cfg.metaColorKeys || [])[metaMonthVal] || '#8b5fbf';
     const monthField   = cfg.meta.find(f => f.key === 'month');
-    const metaTag      = (monthField && e.month) ? `M${e.month} · W${e.week||'?'}` : fmtDate(e.date);
+    const weekField    = cfg.meta.find(f => f.key === 'week');
+    const weekNum      = weekField && e.week ? e.week.toString().match(/\d+/)?.[0] || '?' : '?';
+    const metaTag      = (monthField && e.month) ? `M${monthNum} · W${weekNum}` : fmtDate(e.date);
 
     return `<div class="history-entry">
       <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete entry">✕</button>
@@ -325,6 +344,163 @@ function renderBenchmarks() {
       showLegend: ch.fields.length > 1,
     });
   });
+}
+
+// ── Settings (for nutrition tracker) ──────────────────────────
+function buildSettingsShell(cfg) {
+  if (!cfg.settingsFields) return '';
+  
+  const fields = cfg.settingsFields.map(f => `
+    <div class="tracker-field">${fieldLabel(f)}${fieldInput(f)}</div>`
+  ).join('');
+
+  return `
+    <div style="max-width:600px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:24px;">Personal Settings for Macro Calculation</div>
+      <div class="tracker-card">
+        <div class="tracker-card-title">📊 Your Stats</div>
+        ${fields}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
+        <span id="settings-confirm" style="font-family:'DM Mono',monospace;font-size:12px;color:#3a9e7a;opacity:0;transition:opacity 0.5s;">✓ Saved!</span>
+      </div>
+      
+      <div id="macro-results" style="margin-top:32px;"></div>
+    </div>`;
+}
+
+function loadSettings() {
+  const cfg = getConfig();
+  if (!cfg.hasSettings) return;
+  
+  const stored = localStorage.getItem(`${cfg.storageKey}_settings`);
+  if (!stored) return;
+  
+  try {
+    const settings = JSON.parse(stored);
+    cfg.settingsFields.forEach(f => {
+      const el = document.getElementById(`field-${f.key}`);
+      if (el && settings[f.key]) el.value = settings[f.key];
+    });
+  } catch {}
+}
+
+function saveSettings() {
+  const cfg = getConfig();
+  const settings = {};
+  cfg.settingsFields.forEach(f => {
+    const el = document.getElementById(`field-${f.key}`);
+    if (el) settings[f.key] = el.value;
+  });
+  localStorage.setItem(`${cfg.storageKey}_settings`, JSON.stringify(settings));
+  
+  const confirmEl = document.getElementById('settings-confirm');
+  confirmEl.style.opacity = '1';
+  setTimeout(() => confirmEl.style.opacity = '0', 2500);
+  
+  renderMacroCalc();
+}
+
+function renderMacroCalc() {
+  const cfg = getConfig();
+  if (!cfg.hasSettings) return;
+  
+  const stored = localStorage.getItem(`${cfg.storageKey}_settings`);
+  if (!stored) {
+    document.getElementById('macro-results').innerHTML = `
+      <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
+        Fill in your settings above and save to see macro recommendations.
+      </div>`;
+    return;
+  }
+  
+  const s = JSON.parse(stored);
+  if (!s.age || !s.sex || !s.heightFt || !s.activityLevel || !s.goal) {
+    document.getElementById('macro-results').innerHTML = `
+      <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
+        Complete all fields above to calculate macros.
+      </div>`;
+    return;
+  }
+  
+  // Get current weight from most recent entry
+  const entries = getEntries();
+  const recentWeight = entries.find(e => e.weight);
+  if (!recentWeight) {
+    document.getElementById('macro-results').innerHTML = `
+      <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
+        Log at least one entry with your weight to calculate macros.
+      </div>`;
+    return;
+  }
+  
+  const weightLbs = recentWeight.weightUnit === 'kg' ? recentWeight.weight * 2.20462 : parseFloat(recentWeight.weight);
+  const heightIn = (parseInt(s.heightFt) * 12) + parseInt(s.heightIn || 0);
+  
+  // Mifflin-St Jeor BMR
+  const weightKg = weightLbs / 2.20462;
+  const heightCm = heightIn * 2.54;
+  const bmr = s.sex === 'Male' 
+    ? (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) + 5
+    : (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) - 161;
+  
+  const activityMultipliers = {
+    'Sedentary (little/no exercise)': 1.2,
+    'Lightly active (1-3 days/week)': 1.375,
+    'Moderately active (3-5 days/week)': 1.55,
+    'Very active (6-7 days/week)': 1.725,
+    'Extremely active (athlete)': 1.9
+  };
+  
+  const tdee = bmr * (activityMultipliers[s.activityLevel] || 1.55);
+  
+  let targetCals, protein, carbs, fats;
+  if (s.goal === 'Lose weight') {
+    targetCals = tdee - 500;
+    protein = Math.round(weightLbs * 1.0);
+    fats = Math.round(weightLbs * 0.35);
+    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  } else if (s.goal === 'Gain muscle') {
+    targetCals = tdee + 300;
+    protein = Math.round(weightLbs * 1.2);
+    fats = Math.round(weightLbs * 0.4);
+    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  } else {
+    targetCals = tdee;
+    protein = Math.round(weightLbs * 0.8);
+    fats = Math.round(weightLbs * 0.35);
+    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  }
+  
+  document.getElementById('macro-results').innerHTML = `
+    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Your Recommended Macros</div>
+    <div class="tracker-card">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+        <div style="text-align:center;padding:20px;background:rgba(139,95,191,0.08);border-radius:6px;">
+          <div style="font-size:36px;font-family:'Bebas Neue',sans-serif;color:#8b5fbf;">${Math.round(targetCals)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;">CALORIES/DAY</div>
+          <div style="font-size:12px;color:var(--silver);margin-top:8px;">BMR: ${Math.round(bmr)} · TDEE: ${Math.round(tdee)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="padding:12px;background:rgba(192,112,160,0.08);border-radius:6px;">
+            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#c070a0;">${protein}g</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">PROTEIN</div>
+          </div>
+          <div style="padding:12px;background:rgba(158,122,184,0.08);border-radius:6px;">
+            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#9e7ab8;">${carbs}g</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">CARBS</div>
+          </div>
+          <div style="padding:12px;background:rgba(184,157,224,0.08);border-radius:6px;">
+            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#b89de0;">${fats}g</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">FATS</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:20px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;">
+        Based on your current weight (${Math.round(weightLbs)} lbs), activity level, and goal to ${s.goal.toLowerCase()}. These are estimates — adjust based on how your body responds over 2-3 weeks.
+      </div>
+    </div>`;
 }
 
 // ── Init ──────────────────────────────────────────────────────

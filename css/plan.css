@@ -7,8 +7,8 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
-  background: rgba(168,216,234,0.15);
-  border: 1px solid rgba(168,216,234,0.15);
+  background: rgba(184,157,224,0.15);
+  border: 1px solid rgba(184,157,224,0.15);
   border-radius: 4px;
   margin: 0 0 56px;
   overflow: hidden;
@@ -21,7 +21,7 @@
   transition: background 0.3s;
 }
 
-.overview-item:hover { background: rgba(168,216,234,0.06); }
+.overview-item:hover { background: rgba(184,157,224,0.06); }
 
 .overview-num {
   font-family: 'Bebas Neue', sans-serif;
@@ -45,7 +45,7 @@
   display: flex;
   gap: 4px;
   margin-bottom: 32px;
-  border-bottom: 1px solid rgba(168,216,234,0.1);
+  border-bottom: 1px solid rgba(184,157,224,0.1);
   padding-bottom: 0;
 }
 
@@ -111,8 +111,8 @@
 
 .focus-tag {
   display: inline-block;
-  background: rgba(168,216,234,0.08);
-  border: 1px solid rgba(168,216,234,0.15);
+  background: rgba(184,157,224,0.08);
+  border: 1px solid rgba(184,157,224,0.15);
   padding: 3px 10px;
   border-radius: 2px;
   margin: 2px;
@@ -163,14 +163,14 @@
 
 .week-card {
   background: rgba(17,34,64,0.6);
-  border: 1px solid rgba(168,216,234,0.1);
+  border: 1px solid rgba(184,157,224,0.1);
   border-radius: 6px;
   overflow: hidden;
   transition: border-color 0.3s, transform 0.2s;
 }
 
 .week-card:hover {
-  border-color: rgba(168,216,234,0.25);
+  border-color: rgba(184,157,224,0.25);
   transform: translateY(-2px);
 }
 
@@ -179,8 +179,8 @@
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  background: rgba(168,216,234,0.05);
-  border-bottom: 1px solid rgba(168,216,234,0.08);
+  background: rgba(184,157,224,0.05);
+  border-bottom: 1px solid rgba(184,157,224,0.08);
 }
 
 .week-dot {
@@ -206,7 +206,7 @@
   grid-template-columns: 90px 1fr;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(168,216,234,0.06);
+  border-bottom: 1px solid rgba(184,157,224,0.06);
   align-items: start;
 }
 
@@ -234,7 +234,7 @@
   color: var(--muted);
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(168,216,234,0.1);
+  border-bottom: 1px solid rgba(184,157,224,0.1);
 }
 
 .exercise-grid {
@@ -246,7 +246,7 @@
 
 .exercise-card {
   background: rgba(17,34,64,0.5);
-  border: 1px solid rgba(168,216,234,0.08);
+  border: 1px solid rgba(184,157,224,0.08);
   border-radius: 5px;
   padding: 16px;
   transition: all 0.3s;

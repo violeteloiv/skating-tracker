@@ -5,12 +5,12 @@
 /* ── Cards ── */
 .tracker-card {
   background: rgba(17,34,64,0.7);
-  border: 1px solid rgba(168,216,234,0.1);
+  border: 1px solid rgba(184,157,224,0.1);
   border-radius: 6px;
   padding: 22px;
   transition: border-color 0.3s;
 }
-.tracker-card:hover { border-color: rgba(168,216,234,0.2); }
+.tracker-card:hover { border-color: rgba(184,157,224,0.2); }
 
 .tracker-card-title {
   font-family: 'DM Mono', monospace;
@@ -20,7 +20,7 @@
   color: var(--ice-deep);
   margin-bottom: 18px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(168,216,234,0.1);
+  border-bottom: 1px solid rgba(184,157,224,0.1);
 }
 
 /* ── Form fields ── */
@@ -42,7 +42,7 @@
 .tracker-field textarea {
   width: 100%;
   background: rgba(11,26,46,0.8);
-  border: 1px solid rgba(168,216,234,0.15);
+  border: 1px solid rgba(184,157,224,0.15);
   border-radius: 4px;
   padding: 9px 12px;
   color: var(--frost);
@@ -89,15 +89,15 @@
   font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  background: rgba(168,216,234,0.12);
-  border: 1px solid rgba(168,216,234,0.35);
+  background: rgba(184,157,224,0.12);
+  border: 1px solid rgba(184,157,224,0.35);
   color: var(--ice);
   padding: 12px 28px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
 }
-.save-btn:hover { background: rgba(168,216,234,0.22); border-color: var(--ice-deep); }
+.save-btn:hover { background: rgba(184,157,224,0.22); border-color: var(--ice-deep); }
 
 .clear-btn {
   font-family: 'DM Mono', monospace;
@@ -105,26 +105,26 @@
   letter-spacing: 1px;
   text-transform: uppercase;
   background: transparent;
-  border: 1px solid rgba(168,216,234,0.15);
+  border: 1px solid rgba(184,157,224,0.15);
   color: var(--muted);
   padding: 11px 20px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
 }
-.clear-btn:hover { color: var(--frost); border-color: rgba(168,216,234,0.3); }
+.clear-btn:hover { color: var(--frost); border-color: rgba(184,157,224,0.3); }
 
 /* ── History entries ── */
 .history-entry {
   background: rgba(17,34,64,0.6);
-  border: 1px solid rgba(168,216,234,0.1);
+  border: 1px solid rgba(184,157,224,0.1);
   border-radius: 6px;
   padding: 18px 22px;
   margin-bottom: 12px;
   transition: border-color 0.2s;
   position: relative;
 }
-.history-entry:hover { border-color: rgba(168,216,234,0.22); }
+.history-entry:hover { border-color: rgba(184,157,224,0.22); }
 
 .history-entry-header {
   display: flex;
@@ -149,9 +149,9 @@
   text-transform: uppercase;
   padding: 4px 10px;
   border-radius: 2px;
-  background: rgba(168,216,234,0.08);
+  background: rgba(184,157,224,0.08);
   color: var(--silver);
-  border: 1px solid rgba(168,216,234,0.15);
+  border: 1px solid rgba(184,157,224,0.15);
 }
 
 .history-entry-stats {
@@ -172,7 +172,7 @@
   font-size: 13px;
   font-style: italic;
   color: var(--muted);
-  border-top: 1px solid rgba(168,216,234,0.07);
+  border-top: 1px solid rgba(184,157,224,0.07);
   padding-top: 10px;
   line-height: 1.6;
 }
@@ -195,7 +195,7 @@
 /* ── Personal best cards ── */
 .pb-card {
   background: rgba(17,34,64,0.6);
-  border: 1px solid rgba(168,216,234,0.1);
+  border: 1px solid rgba(184,157,224,0.1);
   border-radius: 6px;
   padding: 18px;
   text-align: center;
