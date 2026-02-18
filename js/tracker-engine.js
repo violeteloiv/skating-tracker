@@ -3,6 +3,8 @@
    Don't edit this file to add trackers — edit tracker-config.js
    ============================================================ */
 
+const APP_VERSION = 'v2.0.0';
+
 let activeTrackerIdx = 0;
 
 function getConfig() { return TRACKER_CONFIGS[activeTrackerIdx]; }
@@ -641,4 +643,12 @@ function renderMacroCalc() {
 }
 
 // ── Init ──────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => { buildTrackerUI(); });
+window.addEventListener('DOMContentLoaded', () => { 
+  buildTrackerUI();
+  
+  // Display version in footer
+  const versionEl = document.getElementById('version-display');
+  if (versionEl) {
+    versionEl.textContent = `Figure Skating Foundation Tracker ${APP_VERSION}`;
+  }
+});
