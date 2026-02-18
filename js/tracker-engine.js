@@ -3,6 +3,8 @@
    Don't edit this file to add trackers — edit tracker-config.js
    ============================================================ */
 
+const APP_VERSION = 'v2.0.2';
+
 let activeTrackerIdx = 0;
 
 function getConfig() { return TRACKER_CONFIGS[activeTrackerIdx]; }
@@ -542,13 +544,34 @@ function renderMacroCalc() {
     return;
   }
   
-  // Get current weight from most recent entry in THIS tracker
-  const entries = getEntries(cfg);
-  const recentWeight = entries.find(e => e.weight);
+  // Get current weight from ANY tracker (usually off-ice training)
+  let recentWeight = null;
+  TRACKER_CONFIGS.forEach(tracker => {
+    if (recentWeight) return; // Already found
+    const trackerEntries = getEntries(tracker);
+    const found = trackerEntries.find(e => e.weight && parseFloat(e.weight) > 0);
+    if (found) recentWeight = found;
+  });
+  
+  // Debug helper
+  const nutritionEntries = getEntries(cfg);
+  console.log('Nutrition entries found:', nutritionEntries.length);
+  console.log('Searching all trackers for weight...');
+  console.log('Weight found:', recentWeight ? `${recentWeight.weight} ${recentWeight.weightUnit}` : 'None');
+  
   if (!recentWeight) {
     resultsEl.innerHTML = `
       <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
-        Log at least one entry with your weight to calculate macros.
+        <div style="font-size:16px;color:var(--frost);margin-bottom:12px;">⚠️ Weight Required</div>
+        <div style="margin-bottom:16px;">No weight data found in any tracker.</div>
+        <div style="background:rgba(139,95,191,0.08);border:1px solid rgba(139,95,191,0.2);border-radius:6px;padding:16px;max-width:400px;margin:0 auto;text-align:left;">
+          <strong style="color:var(--ice-deep);">To see your macro targets:</strong><br><br>
+          1. Go to <strong>🏋️ Off-Ice Training</strong> tracker<br>
+          2. Click <strong>Log Entry</strong> tab<br>
+          3. Fill in <strong>Weight</strong> field (in Body Metrics card)<br>
+          4. Click <strong>Save Entry</strong><br>
+          5. Return to <strong>🥗 Nutrition → Settings</strong> tab
+        </div>
       </div>`;
     return;
   }
@@ -641,4 +664,12 @@ function renderMacroCalc() {
 }
 
 // ── Init ──────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => { buildTrackerUI(); });
+window.addEventListener('DOMContentLoaded', () => { 
+  buildTrackerUI();
+  
+  // Display version in footer
+  const versionEl = document.getElementById('version-display');
+  if (versionEl) {
+    versionEl.textContent = `Figure Skating Foundation Tracker ${APP_VERSION}`;
+  }
+});
