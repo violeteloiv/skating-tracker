@@ -271,6 +271,85 @@ function renderHistory() {
   if (entries.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
+  // For nutrition tracker: group by day and show daily totals + individual entries
+  if (cfg.id === 'nutrition') {
+    const byDate = {};
+    entries.forEach(e => {
+      const dateKey = e.date;
+      if (!byDate[dateKey]) byDate[dateKey] = [];
+      byDate[dateKey].push(e);
+    });
+
+    list.innerHTML = Object.entries(byDate).map(([date, dayEntries]) => {
+      // Calculate daily totals
+      const totals = {
+        calories: dayEntries.reduce((sum, e) => sum + (parseFloat(e.calories) || 0), 0),
+        protein: dayEntries.reduce((sum, e) => sum + (parseFloat(e.protein) || 0), 0),
+        carbs: dayEntries.reduce((sum, e) => sum + (parseFloat(e.carbs) || 0), 0),
+        fats: dayEntries.reduce((sum, e) => sum + (parseFloat(e.fats) || 0), 0),
+        water: dayEntries.reduce((sum, e) => sum + (parseFloat(e.water) || 0), 0),
+      };
+      const waterUnit = dayEntries.find(e => e.waterUnit)?.waterUnit || 'oz';
+      const weight = dayEntries.find(e => e.weight);
+
+      const color = '#8b5fbf';
+      
+      return `<div class="history-entry" style="margin-bottom:20px;">
+        <div class="history-entry-header">
+          <div class="history-entry-date">${fmtDate(date)}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div class="history-entry-tag" style="color:${color};border-color:${color}40;">${dayEntries.length} meal${dayEntries.length > 1 ? 's' : ''}</div>
+            ${weight ? `<div class="history-entry-tag">Weight: ${weight.weight} ${weight.weightUnit||'lbs'}</div>` : ''}
+          </div>
+        </div>
+        <div style="background:rgba(139,95,191,0.06);border-radius:6px;padding:16px;margin:12px 0;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:#8b5fbf;margin-bottom:10px;">Daily Totals</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;">
+            <div>
+              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#c070a0;line-height:1;">${Math.round(totals.calories)}</div>
+              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">CALORIES</div>
+            </div>
+            <div>
+              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#9e7ab8;line-height:1;">${Math.round(totals.protein)}g</div>
+              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">PROTEIN</div>
+            </div>
+            <div>
+              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#b89de0;line-height:1;">${Math.round(totals.carbs)}g</div>
+              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">CARBS</div>
+            </div>
+            <div>
+              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#d6c8df;line-height:1;">${Math.round(totals.fats)}g</div>
+              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">FATS</div>
+            </div>
+            ${totals.water > 0 ? `<div>
+              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#8b5fbf;line-height:1;">${Math.round(totals.water)}</div>
+              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">${waterUnit.toUpperCase()}</div>
+            </div>` : ''}
+          </div>
+        </div>
+        <details style="margin-top:8px;">
+          <summary style="cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:8px 0;">Show individual meals (${dayEntries.length})</summary>
+          <div style="margin-top:12px;padding-left:12px;border-left:2px solid rgba(139,95,191,0.2);">
+            ${dayEntries.map(e => `
+              <div style="margin-bottom:12px;padding:8px;background:rgba(17,34,64,0.4);border-radius:4px;position:relative;">
+                <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete entry" style="top:8px;right:8px;">✕</button>
+                <div style="font-size:12px;color:var(--silver);margin-bottom:4px;">
+                  ${e.calories ? `${e.calories} cal` : ''}
+                  ${e.protein ? ` · ${e.protein}g P` : ''}
+                  ${e.carbs ? ` · ${e.carbs}g C` : ''}
+                  ${e.fats ? ` · ${e.fats}g F` : ''}
+                </div>
+                ${e.notes ? `<div style="font-size:12px;color:var(--muted);font-style:italic;">"${e.notes}"</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </details>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // Original history rendering for non-nutrition trackers
   list.innerHTML = entries.map(e => {
     const stats = cfg.historyStats
       .filter(s => e[s.key])
@@ -312,15 +391,51 @@ function renderBenchmarks() {
   const pbGrid  = document.getElementById('pb-grid');
   if (!pbGrid) return;
 
+  // For nutrition tracker: aggregate multiple entries per day
+  let processedEntries = entries;
+  if (cfg.id === 'nutrition') {
+    const dailyTotals = {};
+    entries.forEach(e => {
+      const dateKey = e.date;
+      if (!dailyTotals[dateKey]) {
+        dailyTotals[dateKey] = { 
+          date: e.date, 
+          calories: 0, protein: 0, carbs: 0, fats: 0, water: 0,
+          weight: null, weightUnit: null, energyLevel: [], hungerLevel: []
+        };
+      }
+      // Sum macros
+      dailyTotals[dateKey].calories += parseFloat(e.calories) || 0;
+      dailyTotals[dateKey].protein  += parseFloat(e.protein) || 0;
+      dailyTotals[dateKey].carbs    += parseFloat(e.carbs) || 0;
+      dailyTotals[dateKey].fats     += parseFloat(e.fats) || 0;
+      dailyTotals[dateKey].water    += parseFloat(e.water) || 0;
+      // Take most recent weight for the day
+      if (e.weight) {
+        dailyTotals[dateKey].weight = e.weight;
+        dailyTotals[dateKey].weightUnit = e.weightUnit;
+      }
+      // Average energy/hunger
+      if (e.energyLevel) dailyTotals[dateKey].energyLevel.push(parseFloat(e.energyLevel));
+      if (e.hungerLevel) dailyTotals[dateKey].hungerLevel.push(parseFloat(e.hungerLevel));
+    });
+    
+    processedEntries = Object.values(dailyTotals).map(day => ({
+      ...day,
+      energyLevel: day.energyLevel.length ? Math.round(day.energyLevel.reduce((a,b)=>a+b,0) / day.energyLevel.length) : null,
+      hungerLevel: day.hungerLevel.length ? Math.round(day.hungerLevel.reduce((a,b)=>a+b,0) / day.hungerLevel.length) : null,
+    }));
+  }
+
   pbGrid.innerHTML = cfg.benchmarks.map(b => {
-    const best = entries.reduce((max, e) => {
+    const best = processedEntries.reduce((max, e) => {
       const v = parseFloat(e[b.key]);
       return (!isNaN(v) && v > max) ? v : max;
     }, 0);
     const has = best > 0;
     return `<div class="pb-card">
       <div class="pb-card-label">${b.label}</div>
-      <div class="pb-card-value" style="color:${has ? b.color : 'var(--muted)'};">${has ? best : '—'}</div>
+      <div class="pb-card-value" style="color:${has ? b.color : 'var(--muted)'};">${has ? Math.round(best) : '—'}</div>
       <div class="pb-card-unit">${has ? b.unit : 'no data yet'}</div>
     </div>`;
   }).join('');
@@ -328,9 +443,9 @@ function renderBenchmarks() {
   cfg.charts.forEach(ch => {
     const datasets = ch.fields.map(f => ({
       key: f.key, label: f.label, color: f.color,
-      points: entries
+      points: processedEntries
         .filter(e => e[f.key] && !isNaN(parseFloat(e[f.key])))
-        .map(e => ({ label: fmtDate(e.date).replace(/,.*/, ''), v: parseFloat(e[f.key]) }))
+        .map(e => ({ label: fmtDate(e.date).replace(/,.*/, ''), v: Math.round(parseFloat(e[f.key])) }))
     })).filter(d => d.points.length >= 1);
 
     const wrapEl = document.getElementById(`${ch.id}-chart-wrap`);
@@ -406,29 +521,32 @@ function renderMacroCalc() {
   const cfg = getConfig();
   if (!cfg.hasSettings) return;
   
+  const resultsEl = document.getElementById('macro-results');
+  if (!resultsEl) return;
+  
   const stored = localStorage.getItem(`${cfg.storageKey}_settings`);
   if (!stored) {
-    document.getElementById('macro-results').innerHTML = `
+    resultsEl.innerHTML = `
       <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
-        Fill in your settings above and save to see macro recommendations.
+        Fill in your settings above and click Save to see macro recommendations.
       </div>`;
     return;
   }
   
   const s = JSON.parse(stored);
   if (!s.age || !s.sex || !s.heightFt || !s.activityLevel || !s.goal) {
-    document.getElementById('macro-results').innerHTML = `
+    resultsEl.innerHTML = `
       <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
         Complete all fields above to calculate macros.
       </div>`;
     return;
   }
   
-  // Get current weight from most recent entry
-  const entries = getEntries();
+  // Get current weight from most recent entry in THIS tracker
+  const entries = getEntries(cfg);
   const recentWeight = entries.find(e => e.weight);
   if (!recentWeight) {
-    document.getElementById('macro-results').innerHTML = `
+    resultsEl.innerHTML = `
       <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
         Log at least one entry with your weight to calculate macros.
       </div>`;
@@ -473,32 +591,51 @@ function renderMacroCalc() {
     carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
   }
   
-  document.getElementById('macro-results').innerHTML = `
-    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Your Recommended Macros</div>
-    <div class="tracker-card">
+  resultsEl.innerHTML = `
+    <div style="background:rgba(139,95,191,0.08);border:1px solid rgba(139,95,191,0.2);border-radius:8px;padding:24px;margin-bottom:16px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#8b5fbf;margin-bottom:20px;text-align:center;">
+        🎯 Your Daily Macro Targets
+      </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
-        <div style="text-align:center;padding:20px;background:rgba(139,95,191,0.08);border-radius:6px;">
-          <div style="font-size:36px;font-family:'Bebas Neue',sans-serif;color:#8b5fbf;">${Math.round(targetCals)}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;">CALORIES/DAY</div>
-          <div style="font-size:12px;color:var(--silver);margin-top:8px;">BMR: ${Math.round(bmr)} · TDEE: ${Math.round(tdee)}</div>
+        <div style="text-align:center;padding:24px;background:rgba(139,95,191,0.12);border-radius:6px;border:2px solid #8b5fbf;">
+          <div style="font-size:48px;font-family:'Bebas Neue',sans-serif;color:#8b5fbf;line-height:1;">${Math.round(targetCals)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:1px;">CALORIES/DAY</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="padding:12px;background:rgba(192,112,160,0.08);border-radius:6px;">
-            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#c070a0;">${protein}g</div>
-            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">PROTEIN</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="padding:14px;background:rgba(192,112,160,0.12);border-radius:6px;border:1px solid rgba(192,112,160,0.3);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">PROTEIN</div>
+            <div style="font-size:28px;font-family:'Bebas Neue',sans-serif;color:#c070a0;line-height:1;">${protein}g</div>
           </div>
-          <div style="padding:12px;background:rgba(158,122,184,0.08);border-radius:6px;">
-            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#9e7ab8;">${carbs}g</div>
-            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">CARBS</div>
+          <div style="padding:14px;background:rgba(158,122,184,0.12);border-radius:6px;border:1px solid rgba(158,122,184,0.3);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">CARBS</div>
+            <div style="font-size:28px;font-family:'Bebas Neue',sans-serif;color:#9e7ab8;line-height:1;">${carbs}g</div>
           </div>
-          <div style="padding:12px;background:rgba(184,157,224,0.08);border-radius:6px;">
-            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#b89de0;">${fats}g</div>
-            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">FATS</div>
+          <div style="padding:14px;background:rgba(184,157,224,0.12);border-radius:6px;border:1px solid rgba(184,157,224,0.3);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">FATS</div>
+            <div style="font-size:28px;font-family:'Bebas Neue',sans-serif;color:#b89de0;line-height:1;">${fats}g</div>
           </div>
         </div>
       </div>
-      <div style="margin-top:20px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;">
-        Based on your current weight (${Math.round(weightLbs)} lbs), activity level, and goal to ${s.goal.toLowerCase()}. These are estimates — adjust based on how your body responds over 2-3 weeks.
+    </div>
+    
+    <div class="tracker-card" style="background:rgba(17,34,64,0.4);">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">📊 Calculation Details</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">BMR</div>
+          <div style="font-size:20px;color:var(--silver);font-family:'Bebas Neue',sans-serif;">${Math.round(bmr)}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">TDEE</div>
+          <div style="font-size:20px;color:var(--silver);font-family:'Bebas Neue',sans-serif;">${Math.round(tdee)}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">Weight</div>
+          <div style="font-size:20px;color:var(--silver);font-family:'Bebas Neue',sans-serif;">${Math.round(weightLbs)} lbs</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;border-top:1px solid rgba(184,157,224,0.1);padding-top:12px;">
+        💡 <strong>Tip:</strong> Log multiple meals/snacks per day and they'll automatically sum up in your daily totals. These targets are based on your goal to ${s.goal.toLowerCase()}. Track for 2-3 weeks and adjust based on results.
       </div>
     </div>`;
 }

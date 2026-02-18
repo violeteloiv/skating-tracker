@@ -141,12 +141,19 @@ const TRACKER_CONFIGS = [
 
     cards: [
       {
+        title: '📊 Body Stats', fullWidth: false,
+        fields: [
+          { key: 'weight',     label: 'Current weight',  type: 'number', placeholder: 'e.g. 130', step: 0.1 },
+          { key: 'weightUnit', label: 'Unit',            type: 'select', options: ['lbs','kg'] },
+        ]
+      },
+      {
         title: '🍽 Daily Macros', fullWidth: false,
         fields: [
-          { key: 'calories', label: 'Total calories', type: 'number', placeholder: 'e.g. 1800' },
-          { key: 'protein',  label: 'Protein (g)',   type: 'number', placeholder: 'e.g. 120' },
-          { key: 'carbs',    label: 'Carbs (g)',     type: 'number', placeholder: 'e.g. 180' },
-          { key: 'fats',     label: 'Fats (g)',      type: 'number', placeholder: 'e.g. 60' },
+          { key: 'calories', label: 'Calories (this meal/snack)', type: 'number', placeholder: 'e.g. 450' },
+          { key: 'protein',  label: 'Protein (g)',   type: 'number', placeholder: 'e.g. 30' },
+          { key: 'carbs',    label: 'Carbs (g)',     type: 'number', placeholder: 'e.g. 45' },
+          { key: 'fats',     label: 'Fats (g)',      type: 'number', placeholder: 'e.g. 15' },
         ]
       },
       {
@@ -186,7 +193,8 @@ const TRACKER_CONFIGS = [
     ],
 
     historyStats: [
-      { key: 'calories', label: 'Calories', suffix: () => ' kcal' },
+      { key: 'weight',  label: 'Weight', suffix: e => ` ${e.weightUnit||'lbs'}` },
+      { key: 'calories', label: 'Cals', suffix: () => '' },
       { key: 'protein',  label: 'Protein',  suffix: () => 'g' },
       { key: 'carbs',    label: 'Carbs',    suffix: () => 'g' },
       { key: 'fats',     label: 'Fats',     suffix: () => 'g' },
