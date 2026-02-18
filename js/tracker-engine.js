@@ -3,7 +3,7 @@
    Don't edit this file to add trackers — edit tracker-config.js
    ============================================================ */
 
-const APP_VERSION = 'v2.0.2';
+const APP_VERSION = 'v2.1.0';
 
 let activeTrackerIdx = 0;
 
@@ -262,6 +262,69 @@ function fmtDate(str) {
   return new Date(str + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 }
 
+// Get nutrition targets for color coding in history
+function getNutritionTargets() {
+  const nutritionConfig = TRACKER_CONFIGS.find(t => t.id === 'nutrition');
+  if (!nutritionConfig) return null;
+  
+  const stored = localStorage.getItem(`${nutritionConfig.storageKey}_settings`);
+  if (!stored) return null;
+  
+  const s = JSON.parse(stored);
+  if (!s.age || !s.sex || !s.heightFt || !s.activityLevel || !s.goal) return null;
+  
+  // Get weight from any tracker
+  let recentWeight = null;
+  TRACKER_CONFIGS.forEach(tracker => {
+    if (recentWeight) return;
+    const entries = getEntries(tracker);
+    const found = entries.find(e => e.weight && parseFloat(e.weight) > 0);
+    if (found) recentWeight = found;
+  });
+  
+  if (!recentWeight) return null;
+  
+  const weightLbs = recentWeight.weightUnit === 'kg' ? recentWeight.weight * 2.20462 : parseFloat(recentWeight.weight);
+  const heightIn = (parseInt(s.heightFt) * 12) + parseInt(s.heightIn || 0);
+  
+  // Calculate BMR and TDEE
+  const weightKg = weightLbs / 2.20462;
+  const heightCm = heightIn * 2.54;
+  const bmr = s.sex === 'Male' 
+    ? (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) + 5
+    : (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) - 161;
+  
+  const activityMultipliers = {
+    'Sedentary (little/no exercise)': 1.2,
+    'Lightly active (1-3 days/week)': 1.375,
+    'Moderately active (3-5 days/week)': 1.55,
+    'Very active (6-7 days/week)': 1.725,
+    'Extremely active (athlete)': 1.9
+  };
+  
+  const tdee = bmr * (activityMultipliers[s.activityLevel] || 1.55);
+  
+  let targetCals, protein, carbs, fats;
+  if (s.goal === 'Lose weight') {
+    targetCals = tdee - 500;
+    protein = Math.round(weightLbs * 1.0);
+    fats = Math.round(weightLbs * 0.35);
+    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  } else if (s.goal === 'Gain muscle') {
+    targetCals = tdee + 300;
+    protein = Math.round(weightLbs * 1.2);
+    fats = Math.round(weightLbs * 0.4);
+    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  } else {
+    targetCals = tdee;
+    protein = Math.round(weightLbs * 0.8);
+    fats = Math.round(weightLbs * 0.35);
+    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  }
+  
+  return { targetCals, protein, carbs, fats };
+}
+
 // ── Render history ────────────────────────────────────────────
 function renderHistory() {
   const cfg     = getConfig();
@@ -275,6 +338,9 @@ function renderHistory() {
 
   // For nutrition tracker: group by day and show daily totals + individual entries
   if (cfg.id === 'nutrition') {
+    // Get targets for color coding
+    const targets = getNutritionTargets();
+    
     const byDate = {};
     entries.forEach(e => {
       const dateKey = e.date;
@@ -292,42 +358,59 @@ function renderHistory() {
         water: dayEntries.reduce((sum, e) => sum + (parseFloat(e.water) || 0), 0),
       };
       const waterUnit = dayEntries.find(e => e.waterUnit)?.waterUnit || 'oz';
-      const weight = dayEntries.find(e => e.weight);
 
       const color = '#8b5fbf';
+      
+      // Helper function to get color and percentage
+      const getMacroDisplay = (actual, target, label) => {
+        if (!targets || !target) {
+          return `
+            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;line-height:1;">${Math.round(actual)}</div>
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">${label}</div>`;
+        }
+        
+        const pct = Math.round((actual / target) * 100);
+        let displayColor, bgColor, borderColor;
+        
+        // Color coding: green = 90-110%, yellow = 70-130%, red = outside that
+        if (pct >= 90 && pct <= 110) {
+          displayColor = '#3a9e7a'; // green
+          bgColor = 'rgba(58,158,122,0.12)';
+          borderColor = 'rgba(58,158,122,0.3)';
+        } else if (pct >= 70 && pct <= 130) {
+          displayColor = '#c9a96e'; // yellow/gold
+          bgColor = 'rgba(201,169,110,0.12)';
+          borderColor = 'rgba(201,169,110,0.3)';
+        } else {
+          displayColor = '#c05050'; // red
+          bgColor = 'rgba(192,80,80,0.12)';
+          borderColor = 'rgba(192,80,80,0.3)';
+        }
+        
+        return `
+          <div style="background:${bgColor};border:1px solid ${borderColor};border-radius:6px;padding:8px;">
+            <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:${displayColor};line-height:1;">${Math.round(actual)}</div>
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:2px;">${label}</div>
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:${displayColor};">${pct}% of ${target}</div>
+          </div>`;
+      };
       
       return `<div class="history-entry" style="margin-bottom:20px;">
         <div class="history-entry-header">
           <div class="history-entry-date">${fmtDate(date)}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <div class="history-entry-tag" style="color:${color};border-color:${color}40;">${dayEntries.length} meal${dayEntries.length > 1 ? 's' : ''}</div>
-            ${weight ? `<div class="history-entry-tag">Weight: ${weight.weight} ${weight.weightUnit||'lbs'}</div>` : ''}
           </div>
         </div>
         <div style="background:rgba(139,95,191,0.06);border-radius:6px;padding:16px;margin:12px 0;">
           <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:#8b5fbf;margin-bottom:10px;">Daily Totals</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;">
-            <div>
-              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#c070a0;line-height:1;">${Math.round(totals.calories)}</div>
-              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">CALORIES</div>
-            </div>
-            <div>
-              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#9e7ab8;line-height:1;">${Math.round(totals.protein)}g</div>
-              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">PROTEIN</div>
-            </div>
-            <div>
-              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#b89de0;line-height:1;">${Math.round(totals.carbs)}g</div>
-              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">CARBS</div>
-            </div>
-            <div>
-              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#d6c8df;line-height:1;">${Math.round(totals.fats)}g</div>
-              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">FATS</div>
-            </div>
-            ${totals.water > 0 ? `<div>
-              <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:#8b5fbf;line-height:1;">${Math.round(totals.water)}</div>
-              <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">${waterUnit.toUpperCase()}</div>
-            </div>` : ''}
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;">
+            ${getMacroDisplay(totals.calories, targets?.targetCals, 'CALORIES')}
+            ${getMacroDisplay(totals.protein, targets?.protein, 'PROTEIN')}
+            ${getMacroDisplay(totals.carbs, targets?.carbs, 'CARBS')}
+            ${getMacroDisplay(totals.fats, targets?.fats, 'FATS')}
           </div>
+          ${!targets ? `<div style="margin-top:12px;font-size:11px;color:var(--muted);font-style:italic;">💡 Set your targets in <strong>Settings</strong> tab to see color-coded progress!</div>` : ''}
         </div>
         <details style="margin-top:8px;">
           <summary style="cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:8px 0;">Show individual meals (${dayEntries.length})</summary>
