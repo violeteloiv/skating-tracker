@@ -2,6 +2,13 @@
    nav.js — top-level page tabs + month tab navigation
    ============================================================ */
 
+const PHASE_BASICS = {
+  1: '1–2',
+  2: '3–4',
+  3: '5–6',
+  4: '7–8',
+};
+
 function showPage(page) {
   document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.page-tab-btn').forEach(b => b.classList.remove('active'));
@@ -18,4 +25,8 @@ function showMonth(num) {
   document.getElementById('month-' + num).classList.add('active');
   document.querySelectorAll('.month-nav .month-btn')[num - 1].classList.add('active');
   document.querySelector('.month-nav').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Update the overview strip's Basics Levels number
+  const basicsEl = document.getElementById('overview-basics-num');
+  if (basicsEl) basicsEl.textContent = PHASE_BASICS[num] || '1–2';
 }
