@@ -1,6 +1,6 @@
 /* ============================================================
    tracker-config.js — ADD OR EDIT TRACKERS HERE
-   
+
    Each object in TRACKER_CONFIGS becomes a tab in the tracker.
    The engine (tracker-engine.js) reads this and builds all UI
    automatically — you never need to touch any other JS file.
@@ -10,6 +10,9 @@
      2. Change id, label, storageKey (must be unique)
      3. Update cards, benchmarks, charts, historyStats
      4. Add it to the array below — done!
+
+   This config is tuned to prepare an adult beginner skater
+   for U.S. Figure Skating Basic Skills Levels 1–8.
    ============================================================ */
 
 const TRACKER_CONFIGS = [
@@ -20,112 +23,219 @@ const TRACKER_CONFIGS = [
 
     // Meta fields shown at the top of every log entry
     meta: [
-      { key: 'date',  label: 'Date',           type: 'date' },
-      { key: 'month', label: 'Training Month',  type: 'select',
-        options: ['Month 1 — Foundation','Month 2 — Build','Month 3 — Power','Month 4 — Performance'] },
-      { key: 'week',  label: 'Week #',           type: 'select',
-        options: ['Week 1','Week 2','Week 3','Week 4'] },
+      { key: 'date',  label: 'Date',          type: 'date' },
+      { key: 'level', label: 'Target Level',  type: 'select',
+        options: [
+          'Basics 1–2 — First Steps',
+          'Basics 3–4 — Edges & Crossovers',
+          'Basics 5–6 — Backward Skating & Turns',
+          'Basics 7–8 — Mohawks, Jumps & Spins',
+        ]
+      },
+      { key: 'week', label: 'Week #', type: 'select',
+        options: ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8'] },
     ],
 
-    // Cards shown in the log form
+    // ── Cards shown in the log form ──────────────────────────
     cards: [
+      // ── Body & Session Feel ─────────────────────────────────
       {
-        title: '📏 Body Metrics', fullWidth: false,
+        title: '📏 Body & Session Feel', fullWidth: false,
         fields: [
           { key: 'weight',     label: 'Weight',                            type: 'number', placeholder: 'e.g. 130', step: 0.1 },
           { key: 'weightUnit', label: 'Unit',                              type: 'select', options: ['lbs','kg'] },
-          { key: 'energy',     label: 'How energized do you feel? (1–10)', type: 'range',  min:1, max:10, default:7 },
-          { key: 'soreness',   label: 'Soreness level today (1–10)',       type: 'range',  min:1, max:10, default:3 },
+          { key: 'energy',     label: 'How energized do you feel? (1–10)', type: 'range',  min: 1, max: 10, default: 7 },
+          { key: 'soreness',   label: 'Soreness level today (1–10)',       type: 'range',  min: 1, max: 10, default: 3 },
         ]
       },
+
+      // ── Balance & Ankle Stability ───────────────────────────
+      // Targets Basic 1 (standing, glides), Basic 2 (one-foot glides),
+      // Basic 4 (edges), Basic 5 (backward edges)
       {
-        title: '💪 Strength', fullWidth: false,
+        title: '⚖️ Balance & Ankle Stability', fullWidth: false,
         fields: [
-          { key: 'pushups', label: 'Max full push-ups (in a row)',     type: 'number', placeholder: 'e.g. 5'  },
-          { key: 'wallsit', label: 'Wall sit hold time (seconds)',     type: 'number', placeholder: 'e.g. 45' },
-          { key: 'plank',   label: 'Full plank hold time (seconds)',   type: 'number', placeholder: 'e.g. 30' },
-          { key: 'slsquat', label: 'Single-leg squat reps (each leg)', type: 'number', placeholder: 'e.g. 3'  },
+          { key: 'singlelegEO',  label: 'Single-leg stand — eyes open (seconds)',   type: 'number', placeholder: 'e.g. 20' },
+          { key: 'singlelegEC',  label: 'Single-leg stand — eyes closed (seconds)', type: 'number', placeholder: 'e.g. 8'  },
+          { key: 'ankleCircles', label: 'Ankle alphabet / circles — both feet done?', type: 'select',
+            options: ['Not yet','One foot only','Both feet — needed support','Both feet — freestanding'] },
+          { key: 'toeRaise',    label: 'Two-foot toe raises in a row (reps)',       type: 'number', placeholder: 'e.g. 15' },
+          { key: 'heelToeWalk', label: 'Heel-to-toe straight-line walk — steps before losing balance', type: 'number', placeholder: 'e.g. 10' },
         ]
       },
+
+      // ── Hip & Knee Strength ─────────────────────────────────
+      // Targets Basic 1 (marching, dips), Basic 3 (forward stroking),
+      // Basic 4 (crossovers, backward stroking), Basic 5 (backward crossovers)
       {
-        title: '⛸ Balance & Skating Skills', fullWidth: false,
+        title: '💪 Hip & Knee Strength', fullWidth: false,
         fields: [
-          { key: 'balance', label: 'Single-leg balance, eyes closed (s)', type: 'number', placeholder: 'e.g. 12' },
-          { key: 'spiral',  label: 'Spiral hold without wall (s)',         type: 'number', placeholder: 'e.g. 8'  },
-          { key: 'sitspin', label: 'Sit-spin squat hold (s)',              type: 'number', placeholder: 'e.g. 5'  },
-          { key: 'lateral', label: 'Lateral balance hold (s)',             type: 'number', placeholder: 'e.g. 10' },
+          { key: 'wallsit',   label: 'Wall sit hold (seconds) — skate-ready position', type: 'number', placeholder: 'e.g. 30' },
+          { key: 'squatReps', label: 'Bodyweight squat reps (knees tracking toes)',    type: 'number', placeholder: 'e.g. 10' },
+          { key: 'lateralHops', label: 'Lateral side hops in a row each side',        type: 'number', placeholder: 'e.g. 8'  },
+          { key: 'hipAbduct',  label: 'Side-lying hip abduction reps (each leg)',      type: 'number', placeholder: 'e.g. 12' },
+          { key: 'gluteBridge', label: 'Glute bridge hold (seconds)',                  type: 'number', placeholder: 'e.g. 20' },
         ]
       },
+
+      // ── Core & Posture ──────────────────────────────────────
+      // Targets skating posture needed from Basic 1 onward;
+      // spin core compression at Basic 3+ (two-foot spin), Basic 5 (one-foot spin)
+      {
+        title: '🧘 Core & Posture', fullWidth: false,
+        fields: [
+          { key: 'plank',      label: 'Full plank hold (seconds)',                    type: 'number', placeholder: 'e.g. 20' },
+          { key: 'deadbug',    label: 'Dead bug reps completed (each side)',          type: 'number', placeholder: 'e.g. 8'  },
+          { key: 'birddog',    label: 'Bird dog hold (seconds, each side)',           type: 'number', placeholder: 'e.g. 5'  },
+          { key: 'postureHold', label: 'Skater stance hold — knees bent, arms out (seconds)', type: 'number', placeholder: 'e.g. 15' },
+        ]
+      },
+
+      // ── Flexibility ─────────────────────────────────────────
+      // Targets the hip, ankle, and inner-thigh flexibility needed for
+      // edges (Basic 4–5), spirals (Basic 6), and crossovers (Basic 4–5)
       {
         title: '🤸 Flexibility', fullWidth: false,
         fields: [
-          { key: 'straddle', label: 'Straddle sit — can you reach the floor?', type: 'select',
-            options: ['Not yet','Fingertips only','Palms down','Forearms on floor'] },
-          { key: 'hipflex',  label: 'Hip flexor stretch — how does it feel?',  type: 'select',
+          { key: 'hipflex',  label: 'Hip flexor lunge stretch — how does it feel?', type: 'select',
             options: ['Very tight','Moderate tension','Mild stretch','Very open'] },
-          { key: 'pigeon',   label: 'Pigeon pose — how low to floor?',          type: 'select',
+          { key: 'straddle', label: 'Straddle sit — how far forward can you reach?', type: 'select',
+            options: ['Not yet','Fingertips only','Palms down','Forearms on floor'] },
+          { key: 'pigeon',   label: 'Pigeon pose — how low to floor?',              type: 'select',
             options: ['Hips far from floor','Need a pillow','Almost flat','Hips flat'] },
+          { key: 'ankleFlex', label: 'Ankle dorsiflexion — can you squat flat-footed?', type: 'select',
+            options: ['Heels lift off floor','Heels barely stay down','Heels flat with effort','Heels flat easily'] },
         ]
       },
+
+      // ── Glide & Edge Simulation ─────────────────────────────
+      // Off-ice drills that mimic on-ice movements directly tested in Basics 1–5
+      {
+        title: '⛸ Glide & Edge Simulation', fullWidth: false,
+        fields: [
+          { key: 'swizzleSim',   label: 'Swizzle simulation (socks on floor) — reps in a row', type: 'number', placeholder: 'e.g. 8'  },
+          { key: 'edgeSim',      label: 'Edge lean — hold a side lean on one foot (seconds)',    type: 'number', placeholder: 'e.g. 5'  },
+          { key: 'crossoverSim', label: 'Crossover walk — side-step cross pattern, steps each direction', type: 'number', placeholder: 'e.g. 6' },
+          { key: 'backwardWalk', label: 'Backward walking — steps in a straight line with control', type: 'number', placeholder: 'e.g. 10' },
+        ]
+      },
+
+      // ── Spin & Jump Preparation ─────────────────────────────
+      // Targets Basic 3 (two-foot spin), Basic 5 (one-foot spin, hockey stop),
+      // Basic 6 (bunny hop, lunge, spiral), Basic 7 (ballet jump, landing position),
+      // Basic 8 (waltz jump, mazurka, combination moves)
+      {
+        title: '🌀 Spin & Jump Preparation', fullWidth: false,
+        fields: [
+          { key: 'twoFootSpin',  label: 'Two-foot spin simulation — full 360° turns on flat floor (reps)', type: 'number', placeholder: 'e.g. 3' },
+          { key: 'oneFootSpin',  label: 'One-foot spin balance position — hold (seconds)',                  type: 'number', placeholder: 'e.g. 4' },
+          { key: 'bunnyHopSim',  label: 'Bunny hop (small jump, land on toe then flat) — reps in a row',   type: 'number', placeholder: 'e.g. 5' },
+          { key: 'landingHold',  label: 'Jump landing position hold — one leg, arms in, free leg back (seconds)', type: 'number', placeholder: 'e.g. 5' },
+          { key: 'spiralHold',   label: 'Spiral (arabesque) hold without support (seconds)',                type: 'number', placeholder: 'e.g. 5' },
+          { key: 'waltzJumpSim', label: 'Waltz jump simulation on floor — step-step-jump-land (reps)',     type: 'number', placeholder: 'e.g. 4' },
+        ]
+      },
+
+      // ── Mohawk & Turn Preparation ───────────────────────────
+      // Targets Basic 4 (forward outside 3-turn), Basic 6 (forward inside 3-turn),
+      // Basic 7 (Mohawk, backward-to-forward transition),
+      // Basic 8 (moving 3-turns, combination move)
+      {
+        title: '🔄 Turns & Mohawk Prep', fullWidth: false,
+        fields: [
+          { key: 'threeTurnFO',  label: 'Forward outside 3-turn on floor — smooth both feet?', type: 'select',
+            options: ['Not attempted','Losing balance','Mostly controlled','Clean both feet'] },
+          { key: 'threeTurnFI',  label: 'Forward inside 3-turn on floor — smooth both feet?',  type: 'select',
+            options: ['Not attempted','Losing balance','Mostly controlled','Clean both feet'] },
+          { key: 'mohawkSim',    label: 'Mohawk transition on floor — weight transfer feels right?', type: 'select',
+            options: ['Not attempted','Very awkward','Getting there','Smooth both directions'] },
+          { key: 'backFwdTurn',  label: 'Backward-to-forward two-foot turn on flat floor — both directions?', type: 'select',
+            options: ['Not yet','One direction only','Both directions with support','Both freestanding'] },
+        ]
+      },
+
+      // ── Cardio & Session Notes ──────────────────────────────
       {
         title: '🫀 Cardio & Session Notes', fullWidth: true,
         inlineGrid: 3,
         fields: [
-          { key: 'cardio', label: 'Cardio duration today (min)',   type: 'number', placeholder: 'e.g. 20' },
-          { key: 'day',    label: 'Session day completed',          type: 'select',
-            options: ['Monday','Tuesday','Wednesday','Thursday','Friday','Rest day'] },
-          { key: 'rating', label: 'Overall session rating (1–10)', type: 'range', min:1, max:10, default:7 },
-          { key: 'notes',  label: 'Notes (how it felt, wins, anything!)', type: 'textarea',
-            placeholder: 'e.g. First time I held the spiral for 10 seconds!', fullWidth: true },
+          { key: 'cardio',  label: 'Cardio duration today (min)',        type: 'number', placeholder: 'e.g. 20' },
+          { key: 'day',     label: 'Session day completed',              type: 'select',
+            options: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Rest day'] },
+          { key: 'rating',  label: 'Overall session rating (1–10)',      type: 'range', min: 1, max: 10, default: 7 },
+          { key: 'notes',   label: 'Notes (breakthroughs, struggles, ice time, anything!)', type: 'textarea',
+            placeholder: 'e.g. Finally held a single-leg stand for 15 seconds!', fullWidth: true },
         ]
       },
     ],
 
-    // Personal-best cards shown in Benchmarks tab
+    // ── Personal-best cards shown in Benchmarks tab ──────────
     benchmarks: [
-      { key: 'pushups', label: 'Max Push-ups',        unit: 'reps',    color: '#8b5fbf' },
-      { key: 'plank',   label: 'Longest Plank',       unit: 'seconds', color: '#9e7ab8' },
-      { key: 'wallsit', label: 'Longest Wall Sit',    unit: 'seconds', color: '#b89de0' },
-      { key: 'balance', label: 'Balance Eyes Closed', unit: 'seconds', color: '#c9a96e' },
-      { key: 'spiral',  label: 'Spiral Hold',         unit: 'seconds', color: '#c070a0' },
-      { key: 'sitspin', label: 'Sit-Spin Squat',      unit: 'seconds', color: '#a8d8ea' },
+      { key: 'singlelegEC',  label: 'Balance — Eyes Closed', unit: 'seconds', color: '#8b5fbf' },
+      { key: 'wallsit',      label: 'Wall Sit',               unit: 'seconds', color: '#9e7ab8' },
+      { key: 'plank',        label: 'Plank Hold',             unit: 'seconds', color: '#b89de0' },
+      { key: 'spiralHold',   label: 'Spiral Hold',            unit: 'seconds', color: '#c9a96e' },
+      { key: 'landingHold',  label: 'Landing Position',       unit: 'seconds', color: '#c070a0' },
+      { key: 'oneFootSpin',  label: 'Spin Balance',           unit: 'seconds', color: '#a8d8ea' },
     ],
 
-    // Line graphs shown in Benchmarks tab
+    // ── Line graphs shown in Benchmarks tab ──────────────────
     charts: [
-      { id: 'weight', title: 'Weight Over Time', fields: [
+      {
+        id: 'weight', title: 'Weight Over Time', fields: [
           { key: 'weight', label: 'Weight', color: '#8b5fbf' },
         ]
       },
-      { id: 'strength', title: 'Strength & Balance Progress', fields: [
-          { key: 'pushups', label: 'Push-ups',    color: '#8b5fbf' },
-          { key: 'plank',   label: 'Plank (s)',   color: '#9e7ab8' },
-          { key: 'wallsit', label: 'Wall sit (s)',color: '#b89de0' },
-          { key: 'balance', label: 'Balance (s)', color: '#c9a96e' },
-          { key: 'spiral',  label: 'Spiral (s)',  color: '#c070a0' },
+      {
+        id: 'balance', title: 'Balance Progress', fields: [
+          { key: 'singlelegEO', label: 'Balance eyes open (s)',  color: '#8b5fbf' },
+          { key: 'singlelegEC', label: 'Balance eyes closed (s)', color: '#b89de0' },
+          { key: 'edgeSim',     label: 'Edge lean hold (s)',      color: '#c9a96e' },
+        ]
+      },
+      {
+        id: 'strength', title: 'Strength & Core Progress', fields: [
+          { key: 'wallsit',     label: 'Wall sit (s)',     color: '#8b5fbf' },
+          { key: 'plank',       label: 'Plank (s)',        color: '#9e7ab8' },
+          { key: 'gluteBridge', label: 'Glute bridge (s)', color: '#b89de0' },
+          { key: 'squatReps',   label: 'Squats (reps)',    color: '#c070a0' },
+        ]
+      },
+      {
+        id: 'skating', title: 'Skating Skills Progress', fields: [
+          { key: 'spiralHold',   label: 'Spiral hold (s)',    color: '#c070a0' },
+          { key: 'landingHold',  label: 'Landing hold (s)',   color: '#9e7ab8' },
+          { key: 'oneFootSpin',  label: 'Spin balance (s)',   color: '#a8d8ea' },
+          { key: 'waltzJumpSim', label: 'Waltz jump (reps)',  color: '#c9a96e' },
         ]
       },
     ],
 
-    // Fields to show as stat pills in history entries
+    // ── Fields shown as stat pills in history entries ─────────
     historyStats: [
-      { key: 'weight',  label: 'Weight',        suffix: e => ` ${e.weightUnit||'lbs'}` },
-      { key: 'pushups', label: 'Push-ups',       suffix: () => '' },
-      { key: 'plank',   label: 'Plank',          suffix: () => 's' },
-      { key: 'wallsit', label: 'Wall sit',       suffix: () => 's' },
-      { key: 'balance', label: 'Balance',        suffix: () => 's' },
-      { key: 'spiral',  label: 'Spiral',         suffix: () => 's' },
-      { key: 'sitspin', label: 'Sit-spin',       suffix: () => 's' },
-      { key: 'cardio',  label: 'Cardio',         suffix: () => ' min' },
-      { key: 'energy',  label: 'Energy',         suffix: () => '/10' },
-      { key: 'rating',  label: 'Session rating', suffix: () => '/10' },
+      { key: 'weight',       label: 'Weight',          suffix: e => ` ${e.weightUnit || 'lbs'}` },
+      { key: 'singlelegEO',  label: 'Balance open',    suffix: () => 's' },
+      { key: 'singlelegEC',  label: 'Balance closed',  suffix: () => 's' },
+      { key: 'wallsit',      label: 'Wall sit',        suffix: () => 's' },
+      { key: 'plank',        label: 'Plank',           suffix: () => 's' },
+      { key: 'spiralHold',   label: 'Spiral',          suffix: () => 's' },
+      { key: 'landingHold',  label: 'Landing',         suffix: () => 's' },
+      { key: 'oneFootSpin',  label: 'Spin balance',    suffix: () => 's' },
+      { key: 'bunnyHopSim',  label: 'Bunny hops',      suffix: () => '' },
+      { key: 'waltzJumpSim', label: 'Waltz jumps',     suffix: () => '' },
+      { key: 'cardio',       label: 'Cardio',          suffix: () => ' min' },
+      { key: 'energy',       label: 'Energy',          suffix: () => '/10' },
+      { key: 'rating',       label: 'Session rating',  suffix: () => '/10' },
     ],
 
-    // Select (non-numeric) fields to show in history entries
-    historySelectStats: ['straddle','hipflex','pigeon'],
+    // ── Select (non-numeric) fields shown in history entries ──
+    historySelectStats: [
+      'hipflex', 'straddle', 'ankleFlex',
+      'threeTurnFO', 'threeTurnFI', 'mohawkSim', 'backFwdTurn',
+    ],
 
-    // Colors for the month tag in history (one per meta month option)
-    metaColorKeys: ['#8b5fbf','#9e7ab8','#b89de0','#c070a0'],
+    // ── Colors for the level tag in history (one per meta level option) ──
+    metaColorKeys: ['#8b5fbf', '#9e7ab8', '#b89de0', '#c070a0'],
   },
 
 
@@ -152,10 +262,10 @@ const TRACKER_CONFIGS = [
       {
         title: '💧 Hydration & Energy', fullWidth: false,
         fields: [
-          { key: 'water',  label: 'Water intake (oz or mL)', type: 'number', placeholder: 'e.g. 80' },
-          { key: 'waterUnit', label: 'Unit', type: 'select', options: ['oz','mL'] },
-          { key: 'energyLevel', label: 'Energy level (1–10)', type: 'range', min:1, max:10, default:7 },
-          { key: 'hungerLevel', label: 'Hunger level (1–10)', type: 'range', min:1, max:10, default:5 },
+          { key: 'water',       label: 'Water intake (oz or mL)', type: 'number', placeholder: 'e.g. 80' },
+          { key: 'waterUnit',   label: 'Unit',                    type: 'select', options: ['oz','mL'] },
+          { key: 'energyLevel', label: 'Energy level (1–10)',     type: 'range', min: 1, max: 10, default: 7 },
+          { key: 'hungerLevel', label: 'Hunger level (1–10)',     type: 'range', min: 1, max: 10, default: 5 },
         ]
       },
       {
@@ -173,11 +283,13 @@ const TRACKER_CONFIGS = [
     ],
 
     charts: [
-      { id: 'cals', title: 'Calorie Intake Over Time', fields: [
+      {
+        id: 'cals', title: 'Calorie Intake Over Time', fields: [
           { key: 'calories', label: 'Calories', color: '#8b5fbf' },
         ]
       },
-      { id: 'macros', title: 'Macronutrient Balance', fields: [
+      {
+        id: 'macros', title: 'Macronutrient Balance', fields: [
           { key: 'protein', label: 'Protein (g)', color: '#c070a0' },
           { key: 'carbs',   label: 'Carbs (g)',   color: '#9e7ab8' },
           { key: 'fats',    label: 'Fats (g)',    color: '#b89de0' },
@@ -186,67 +298,34 @@ const TRACKER_CONFIGS = [
     ],
 
     historyStats: [
-      { key: 'calories', label: 'Cals', suffix: () => '' },
-      { key: 'protein',  label: 'Protein',  suffix: () => 'g' },
-      { key: 'carbs',    label: 'Carbs',    suffix: () => 'g' },
-      { key: 'fats',     label: 'Fats',     suffix: () => 'g' },
-      { key: 'water',    label: 'Water',    suffix: e => ` ${e.waterUnit||'oz'}` },
-      { key: 'energyLevel', label: 'Energy', suffix: () => '/10' },
+      { key: 'calories',    label: 'Cals',    suffix: () => ''     },
+      { key: 'protein',     label: 'Protein', suffix: () => 'g'    },
+      { key: 'carbs',       label: 'Carbs',   suffix: () => 'g'    },
+      { key: 'fats',        label: 'Fats',    suffix: () => 'g'    },
+      { key: 'water',       label: 'Water',   suffix: e => ` ${e.waterUnit || 'oz'}` },
+      { key: 'energyLevel', label: 'Energy',  suffix: () => '/10'  },
     ],
 
     historySelectStats: [],
     metaColorKeys: ['#8b5fbf'],
 
-    // Nutrition-specific: settings for macro calculations
     hasSettings: true,
     settingsFields: [
-      { key: 'age',       label: 'Age',             type: 'number', placeholder: 'e.g. 25' },
-      { key: 'sex',       label: 'Sex',             type: 'select', options: ['Female','Male'] },
-      { key: 'heightFt',  label: 'Height (ft)',     type: 'number', placeholder: 'e.g. 5' },
-      { key: 'heightIn',  label: 'Height (in)',     type: 'number', placeholder: 'e.g. 6' },
-      { key: 'activityLevel', label: 'Activity Level', type: 'select',
-        options: ['Sedentary (little/no exercise)','Lightly active (1-3 days/week)','Moderately active (3-5 days/week)','Very active (6-7 days/week)','Extremely active (athlete)'] },
-      { key: 'goal',      label: 'Goal',            type: 'select',
+      { key: 'age',           label: 'Age',             type: 'number', placeholder: 'e.g. 21' },
+      { key: 'sex',           label: 'Sex',             type: 'select', options: ['Female','Male'] },
+      { key: 'heightFt',      label: 'Height (ft)',     type: 'number', placeholder: 'e.g. 5' },
+      { key: 'heightIn',      label: 'Height (in)',     type: 'number', placeholder: 'e.g. 6' },
+      { key: 'activityLevel', label: 'Activity Level',  type: 'select',
+        options: [
+          'Sedentary (little/no exercise)',
+          'Lightly active (1-3 days/week)',
+          'Moderately active (3-5 days/week)',
+          'Very active (6-7 days/week)',
+          'Extremely active (athlete)',
+        ]
+      },
+      { key: 'goal', label: 'Goal', type: 'select',
         options: ['Lose weight','Maintain weight','Gain muscle'] },
     ],
   },
-
-
-  // ── EXAMPLE: On-Ice Sessions tracker ──────────────────────
-  // Uncomment this entire block when you're ready to track
-  // your on-ice progress!
-  //
-  // {
-  //   id: 'onice',
-  //   label: '⛸ On-Ice Sessions',
-  //   storageKey: 'skating_onice_entries',
-  //   meta: [
-  //     { key: 'date',      label: 'Date',     type: 'date' },
-  //     { key: 'lessonNum', label: 'Lesson #', type: 'number', placeholder: 'e.g. 1' },
-  //   ],
-  //   cards: [
-  //     { title: '🛼 Elements Attempted', fullWidth: false, fields: [
-  //       { key: 'forwardGlide', label: 'Forward glide (m)',     type: 'number', placeholder: 'e.g. 5' },
-  //       { key: 'twoFootStop',  label: 'Two-foot stop: clean?', type: 'select', options: ['Not yet','Sort of','Yes!'] },
-  //       { key: 'crossovers',   label: 'Crossovers attempted?', type: 'select', options: ['No','Yes'] },
-  //     ]},
-  //     { title: '💬 Session Notes', fullWidth: true, fields: [
-  //       { key: 'notes', label: 'Coach feedback / personal notes', type: 'textarea',
-  //         placeholder: 'e.g. Held an edge for the first time!', fullWidth: true },
-  //     ]},
-  //   ],
-  //   benchmarks: [
-  //     { key: 'forwardGlide', label: 'Longest Glide', unit: 'metres', color: '#8b5fbf' },
-  //   ],
-  //   charts: [
-  //     { id: 'glide', title: 'Forward Glide Distance', fields: [
-  //       { key: 'forwardGlide', label: 'Glide (m)', color: '#8b5fbf' },
-  //     ]},
-  //   ],
-  //   historyStats: [
-  //     { key: 'forwardGlide', label: 'Forward glide', suffix: () => 'm' },
-  //   ],
-  //   historySelectStats: ['twoFootStop','crossovers'],
-  //   metaColorKeys: ['#8b5fbf'],
-  // },
 ];
