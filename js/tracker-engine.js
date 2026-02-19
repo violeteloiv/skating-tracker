@@ -3,7 +3,7 @@
    Don't edit this file to add trackers — edit tracker-config.js
    ============================================================ */
 
-const APP_VERSION = 'v2.1.0';
+const APP_VERSION = 'v2.3.0';
 
 let activeTrackerIdx = 0;
 
@@ -66,7 +66,7 @@ function showTrackerTab(tab) {
   const cfg = getConfig();
   const tabs = ['log','history','benchmarks'];
   if (cfg.hasSettings) tabs.push('settings');
-  
+
   tabs.forEach(t => {
     const el = document.getElementById('tracker-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
@@ -266,13 +266,13 @@ function fmtDate(str) {
 function getNutritionTargets() {
   const nutritionConfig = TRACKER_CONFIGS.find(t => t.id === 'nutrition');
   if (!nutritionConfig) return null;
-  
+
   const stored = localStorage.getItem(`${nutritionConfig.storageKey}_settings`);
   if (!stored) return null;
-  
+
   const s = JSON.parse(stored);
   if (!s.age || !s.sex || !s.heightFt || !s.activityLevel || !s.goal) return null;
-  
+
   // Get weight from any tracker
   let recentWeight = null;
   TRACKER_CONFIGS.forEach(tracker => {
@@ -281,19 +281,19 @@ function getNutritionTargets() {
     const found = entries.find(e => e.weight && parseFloat(e.weight) > 0);
     if (found) recentWeight = found;
   });
-  
+
   if (!recentWeight) return null;
-  
+
   const weightLbs = recentWeight.weightUnit === 'kg' ? recentWeight.weight * 2.20462 : parseFloat(recentWeight.weight);
   const heightIn = (parseInt(s.heightFt) * 12) + parseInt(s.heightIn || 0);
-  
+
   // Calculate BMR and TDEE
   const weightKg = weightLbs / 2.20462;
   const heightCm = heightIn * 2.54;
-  const bmr = s.sex === 'Male' 
+  const bmr = s.sex === 'Male'
     ? (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) + 5
     : (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) - 161;
-  
+
   const activityMultipliers = {
     'Sedentary (little/no exercise)': 1.2,
     'Lightly active (1-3 days/week)': 1.375,
@@ -301,9 +301,9 @@ function getNutritionTargets() {
     'Very active (6-7 days/week)': 1.725,
     'Extremely active (athlete)': 1.9
   };
-  
+
   const tdee = bmr * (activityMultipliers[s.activityLevel] || 1.55);
-  
+
   let targetCals, protein, carbs, fats;
   if (s.goal === 'Lose weight') {
     targetCals = tdee - 500;
@@ -321,7 +321,7 @@ function getNutritionTargets() {
     fats = Math.round(weightLbs * 0.35);
     carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
   }
-  
+
   return { targetCals, protein, carbs, fats };
 }
 
@@ -340,7 +340,7 @@ function renderHistory() {
   if (cfg.id === 'nutrition') {
     // Get targets for color coding
     const targets = getNutritionTargets();
-    
+
     const byDate = {};
     entries.forEach(e => {
       const dateKey = e.date;
@@ -360,7 +360,7 @@ function renderHistory() {
       const waterUnit = dayEntries.find(e => e.waterUnit)?.waterUnit || 'oz';
 
       const color = '#8b5fbf';
-      
+
       // Helper function to get color and percentage
       const getMacroDisplay = (actual, target, label) => {
         if (!targets || !target) {
@@ -368,25 +368,24 @@ function renderHistory() {
             <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;line-height:1;">${Math.round(actual)}</div>
             <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">${label}</div>`;
         }
-        
+
         const pct = Math.round((actual / target) * 100);
         let displayColor, bgColor, borderColor;
-        
-        // Color coding: green = 90-110%, yellow = 70-130%, red = outside that
+
         if (pct >= 90 && pct <= 110) {
-          displayColor = '#3a9e7a'; // green
+          displayColor = '#3a9e7a';
           bgColor = 'rgba(58,158,122,0.12)';
           borderColor = 'rgba(58,158,122,0.3)';
         } else if (pct >= 70 && pct <= 130) {
-          displayColor = '#c9a96e'; // yellow/gold
+          displayColor = '#c9a96e';
           bgColor = 'rgba(201,169,110,0.12)';
           borderColor = 'rgba(201,169,110,0.3)';
         } else {
-          displayColor = '#c05050'; // red
+          displayColor = '#c05050';
           bgColor = 'rgba(192,80,80,0.12)';
           borderColor = 'rgba(192,80,80,0.3)';
         }
-        
+
         return `
           <div style="background:${bgColor};border:1px solid ${borderColor};border-radius:6px;padding:8px;">
             <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:${displayColor};line-height:1;">${Math.round(actual)}</div>
@@ -394,7 +393,7 @@ function renderHistory() {
             <div style="font-size:10px;font-family:'DM Mono',monospace;color:${displayColor};">${pct}% of ${target}</div>
           </div>`;
       };
-      
+
       return `<div class="history-entry" style="margin-bottom:20px;">
         <div class="history-entry-header">
           <div class="history-entry-date">${fmtDate(date)}</div>
@@ -444,14 +443,26 @@ function renderHistory() {
       .filter(k => e[k])
       .map(k => `${k}: <span>${e[k]}</span>`);
 
-    // Extract month number from "Month 1 — Foundation" format
-    const monthNum = e.month ? parseInt(e.month.toString().match(/\d+/)?.[0] || '0') : 0;
-    const metaMonthVal = monthNum - 1;
-    const color        = (cfg.metaColorKeys || [])[metaMonthVal] || '#8b5fbf';
-    const monthField   = cfg.meta.find(f => f.key === 'month');
-    const weekField    = cfg.meta.find(f => f.key === 'week');
-    const weekNum      = weekField && e.week ? e.week.toString().match(/\d+/)?.[0] || '?' : '?';
-    const metaTag      = (monthField && e.month) ? `M${monthNum} · W${weekNum}` : fmtDate(e.date);
+    // Extract phase/month number
+    const phaseRaw = e.phase || e.month || '';
+    const phaseNum = phaseRaw ? parseInt(phaseRaw.toString().match(/\d+/)?.[0] || '0') : 0;
+    const color    = (cfg.metaColorKeys || [])[phaseNum - 1] || '#8b5fbf';
+
+    // Build meta tag label
+    let metaTag = fmtDate(e.date);
+    const phaseField = cfg.meta.find(f => f.key === 'phase' || f.key === 'month');
+    const weekField  = cfg.meta.find(f => f.key === 'week');
+    const sessionField = cfg.meta.find(f => f.key === 'sessionNum');
+    if (phaseField && phaseRaw) {
+      if (sessionField && e.sessionNum) {
+        metaTag = `P${phaseNum} · Session ${e.sessionNum}`;
+      } else if (weekField && e.week) {
+        const weekNum = e.week.toString().match(/\d+/)?.[0] || '?';
+        metaTag = `P${phaseNum} · W${weekNum}`;
+      } else {
+        metaTag = `Phase ${phaseNum}`;
+      }
+    }
 
     return `<div class="history-entry">
       <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete entry">✕</button>
@@ -483,28 +494,25 @@ function renderBenchmarks() {
     entries.forEach(e => {
       const dateKey = e.date;
       if (!dailyTotals[dateKey]) {
-        dailyTotals[dateKey] = { 
-          date: e.date, 
+        dailyTotals[dateKey] = {
+          date: e.date,
           calories: 0, protein: 0, carbs: 0, fats: 0, water: 0,
           weight: null, weightUnit: null, energyLevel: [], hungerLevel: []
         };
       }
-      // Sum macros
       dailyTotals[dateKey].calories += parseFloat(e.calories) || 0;
       dailyTotals[dateKey].protein  += parseFloat(e.protein) || 0;
       dailyTotals[dateKey].carbs    += parseFloat(e.carbs) || 0;
       dailyTotals[dateKey].fats     += parseFloat(e.fats) || 0;
       dailyTotals[dateKey].water    += parseFloat(e.water) || 0;
-      // Take most recent weight for the day
       if (e.weight) {
         dailyTotals[dateKey].weight = e.weight;
         dailyTotals[dateKey].weightUnit = e.weightUnit;
       }
-      // Average energy/hunger
       if (e.energyLevel) dailyTotals[dateKey].energyLevel.push(parseFloat(e.energyLevel));
       if (e.hungerLevel) dailyTotals[dateKey].hungerLevel.push(parseFloat(e.hungerLevel));
     });
-    
+
     processedEntries = Object.values(dailyTotals).map(day => ({
       ...day,
       energyLevel: day.energyLevel.length ? Math.round(day.energyLevel.reduce((a,b)=>a+b,0) / day.energyLevel.length) : null,
@@ -549,7 +557,7 @@ function renderBenchmarks() {
 // ── Settings (for nutrition tracker) ──────────────────────────
 function buildSettingsShell(cfg) {
   if (!cfg.settingsFields) return '';
-  
+
   const fields = cfg.settingsFields.map(f => `
     <div class="tracker-field">${fieldLabel(f)}${fieldInput(f)}</div>`
   ).join('');
@@ -565,7 +573,7 @@ function buildSettingsShell(cfg) {
         <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
         <span id="settings-confirm" style="font-family:'DM Mono',monospace;font-size:12px;color:#3a9e7a;opacity:0;transition:opacity 0.5s;">✓ Saved!</span>
       </div>
-      
+
       <div id="macro-results" style="margin-top:32px;"></div>
     </div>`;
 }
@@ -573,10 +581,10 @@ function buildSettingsShell(cfg) {
 function loadSettings() {
   const cfg = getConfig();
   if (!cfg.hasSettings) return;
-  
+
   const stored = localStorage.getItem(`${cfg.storageKey}_settings`);
   if (!stored) return;
-  
+
   try {
     const settings = JSON.parse(stored);
     cfg.settingsFields.forEach(f => {
@@ -594,21 +602,21 @@ function saveSettings() {
     if (el) settings[f.key] = el.value;
   });
   localStorage.setItem(`${cfg.storageKey}_settings`, JSON.stringify(settings));
-  
+
   const confirmEl = document.getElementById('settings-confirm');
   confirmEl.style.opacity = '1';
   setTimeout(() => confirmEl.style.opacity = '0', 2500);
-  
+
   renderMacroCalc();
 }
 
 function renderMacroCalc() {
   const cfg = getConfig();
   if (!cfg.hasSettings) return;
-  
+
   const resultsEl = document.getElementById('macro-results');
   if (!resultsEl) return;
-  
+
   const stored = localStorage.getItem(`${cfg.storageKey}_settings`);
   if (!stored) {
     resultsEl.innerHTML = `
@@ -617,7 +625,7 @@ function renderMacroCalc() {
       </div>`;
     return;
   }
-  
+
   const s = JSON.parse(stored);
   if (!s.age || !s.sex || !s.heightFt || !s.activityLevel || !s.goal) {
     resultsEl.innerHTML = `
@@ -626,22 +634,16 @@ function renderMacroCalc() {
       </div>`;
     return;
   }
-  
-  // Get current weight from ANY tracker (usually off-ice training)
+
+  // Get current weight from ANY tracker
   let recentWeight = null;
   TRACKER_CONFIGS.forEach(tracker => {
-    if (recentWeight) return; // Already found
+    if (recentWeight) return;
     const trackerEntries = getEntries(tracker);
     const found = trackerEntries.find(e => e.weight && parseFloat(e.weight) > 0);
     if (found) recentWeight = found;
   });
-  
-  // Debug helper
-  const nutritionEntries = getEntries(cfg);
-  console.log('Nutrition entries found:', nutritionEntries.length);
-  console.log('Searching all trackers for weight...');
-  console.log('Weight found:', recentWeight ? `${recentWeight.weight} ${recentWeight.weightUnit}` : 'None');
-  
+
   if (!recentWeight) {
     resultsEl.innerHTML = `
       <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
@@ -658,17 +660,16 @@ function renderMacroCalc() {
       </div>`;
     return;
   }
-  
+
   const weightLbs = recentWeight.weightUnit === 'kg' ? recentWeight.weight * 2.20462 : parseFloat(recentWeight.weight);
   const heightIn = (parseInt(s.heightFt) * 12) + parseInt(s.heightIn || 0);
-  
-  // Mifflin-St Jeor BMR
+
   const weightKg = weightLbs / 2.20462;
   const heightCm = heightIn * 2.54;
-  const bmr = s.sex === 'Male' 
+  const bmr = s.sex === 'Male'
     ? (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) + 5
     : (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) - 161;
-  
+
   const activityMultipliers = {
     'Sedentary (little/no exercise)': 1.2,
     'Lightly active (1-3 days/week)': 1.375,
@@ -676,9 +677,9 @@ function renderMacroCalc() {
     'Very active (6-7 days/week)': 1.725,
     'Extremely active (athlete)': 1.9
   };
-  
+
   const tdee = bmr * (activityMultipliers[s.activityLevel] || 1.55);
-  
+
   let targetCals, protein, carbs, fats;
   if (s.goal === 'Lose weight') {
     targetCals = tdee - 500;
@@ -696,7 +697,7 @@ function renderMacroCalc() {
     fats = Math.round(weightLbs * 0.35);
     carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
   }
-  
+
   resultsEl.innerHTML = `
     <div style="background:rgba(139,95,191,0.08);border:1px solid rgba(139,95,191,0.2);border-radius:8px;padding:24px;margin-bottom:16px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#8b5fbf;margin-bottom:20px;text-align:center;">
@@ -723,7 +724,7 @@ function renderMacroCalc() {
         </div>
       </div>
     </div>
-    
+
     <div class="tracker-card" style="background:rgba(17,34,64,0.4);">
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">📊 Calculation Details</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
@@ -747,9 +748,9 @@ function renderMacroCalc() {
 }
 
 // ── Init ──────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => { 
+window.addEventListener('DOMContentLoaded', () => {
   buildTrackerUI();
-  
+
   // Display version in footer
   const versionEl = document.getElementById('version-display');
   if (versionEl) {

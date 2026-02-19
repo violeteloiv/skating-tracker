@@ -239,6 +239,187 @@ const TRACKER_CONFIGS = [
   },
 
 
+  // ── ON-ICE SESSIONS TRACKER ────────────────────────────────
+  {
+    id: 'onice',
+    label: '⛸ On-Ice Sessions',
+    storageKey: 'skating_onice_entries',
+
+    meta: [
+      { key: 'date',  label: 'Date',         type: 'date' },
+      { key: 'phase', label: 'Phase',         type: 'select',
+        options: [
+          'Phase 1 — Basics 1–2',
+          'Phase 2 — Basics 3–4',
+          'Phase 3 — Basics 5–6',
+          'Phase 4 — Basics 7–8',
+        ]
+      },
+      { key: 'sessionNum', label: 'Session #', type: 'number', placeholder: 'e.g. 3' },
+    ],
+
+    cards: [
+      // ── Session Feel ──────────────────────────────────────────
+      {
+        title: '📋 Session Feel', fullWidth: false,
+        fields: [
+          { key: 'iceTime',    label: 'Ice time (minutes)',                type: 'number', placeholder: 'e.g. 45' },
+          { key: 'confidence', label: 'Overall confidence on ice (1–10)',  type: 'range',  min: 1, max: 10, default: 5 },
+          { key: 'energy',     label: 'Energy level today (1–10)',         type: 'range',  min: 1, max: 10, default: 7 },
+          { key: 'falls',      label: 'Number of falls this session',      type: 'number', placeholder: 'e.g. 2' },
+        ]
+      },
+
+      // ── Basics 1–2 Elements ───────────────────────────────────
+      {
+        title: '🔵 Basics 1–2 Elements', fullWidth: false,
+        fields: [
+          { key: 'twoFootGlide',   label: 'Two-foot glide — felt how?',          type: 'select',
+            options: ['Not attempted','Very shaky','Getting there','Solid'] },
+          { key: 'oneFootGlideR',  label: 'One-foot glide — Right foot hold (s)', type: 'number', placeholder: 'e.g. 3' },
+          { key: 'oneFootGlideL',  label: 'One-foot glide — Left foot hold (s)',  type: 'number', placeholder: 'e.g. 3' },
+          { key: 'snowplowStop',   label: 'Snowplow stop — felt how?',            type: 'select',
+            options: ['Not attempted','Inconsistent','Mostly reliable','Clean every time'] },
+          { key: 'fwdSwizzles',    label: 'Forward swizzles — reps in a row',     type: 'number', placeholder: 'e.g. 6' },
+          { key: 'bwdWiggles',     label: 'Backward wiggles — reps in a row',     type: 'number', placeholder: 'e.g. 6' },
+        ]
+      },
+
+      // ── Basics 3–4 Elements ───────────────────────────────────
+      {
+        title: '🟣 Basics 3–4 Elements', fullWidth: false,
+        fields: [
+          { key: 'fwdStroking',    label: 'Forward stroking — felt how?',         type: 'select',
+            options: ['Not attempted','Stepping not pushing','Pushing but uneven','Clean push and glide'] },
+          { key: 'fwdCrossovers',  label: 'Forward crossovers — felt how?',       type: 'select',
+            options: ['Not attempted','Stepping not crossing','Crossing but flat','Crossing with lean'] },
+          { key: 'twoFootSpin',    label: 'Two-foot spin — revolutions',          type: 'number', placeholder: 'e.g. 2' },
+          { key: 'foThreeTurn',    label: 'FO 3-turn — felt how?',                type: 'select',
+            options: ['Not attempted','Losing balance','Mostly controlled','Clean both feet'] },
+          { key: 'fwdEdges',       label: 'Forward edges (inside & outside) — felt how?', type: 'select',
+            options: ['Not attempted','Flat — no lean','Some lean both types','Clear edge both types'] },
+        ]
+      },
+
+      // ── Basics 5–6 Elements ───────────────────────────────────
+      {
+        title: '🌸 Basics 5–6 Elements', fullWidth: false,
+        fields: [
+          { key: 'bwdCrossovers',  label: 'Backward crossovers — felt how?',      type: 'select',
+            options: ['Not attempted','Stepping not crossing','Crossing both directions','Confident both directions'] },
+          { key: 'hockeyStop',     label: 'Hockey stop — felt how?',              type: 'select',
+            options: ['Not attempted','Catching edge','One side only','Both sides clean'] },
+          { key: 'oneFootSpin',    label: 'One-foot spin — revolutions held',     type: 'number', placeholder: 'e.g. 2' },
+          { key: 'spiral',         label: 'Spiral — free leg height',             type: 'select',
+            options: ['Not attempted','Below hip','At hip height','Above hip'] },
+          { key: 'bunnyHop',       label: 'Bunny hop — felt how?',                type: 'select',
+            options: ['Not attempted','Hesitant','Landing but no hold','Clean toe-then-flat landing'] },
+          { key: 'fiThreeTurn',    label: 'FI 3-turn — felt how?',               type: 'select',
+            options: ['Not attempted','Losing balance','Mostly controlled','Clean both feet'] },
+        ]
+      },
+
+      // ── Basics 7–8 Elements ───────────────────────────────────
+      {
+        title: '🏆 Basics 7–8 Elements', fullWidth: false,
+        fields: [
+          { key: 'mohawk',         label: 'Mohawk — felt how?',                   type: 'select',
+            options: ['Not attempted','Very awkward','Getting smoother','Smooth both directions'] },
+          { key: 'waltzJump',      label: 'Waltz jump — felt how?',               type: 'select',
+            options: ['Not attempted','No rotation yet','Half-turn but falling','Clean landing hold'] },
+          { key: 'uprightSpin',    label: 'One-foot upright spin — revolutions',  type: 'number', placeholder: 'e.g. 3' },
+          { key: 'combinationMove',label: 'Basic 8 combination move — felt how?', type: 'select',
+            options: ['Not attempted','Broken up — lots of pauses','Mostly connected','Fully connected both directions'] },
+          { key: 'movingThreeTurn',label: 'Moving 3-turns (FO & FI) — felt how?', type: 'select',
+            options: ['Not attempted','From standstill only','Moving entry but unsteady','Clean from moving entry'] },
+          { key: 'mazurka',        label: 'Mazurka — felt how?',                  type: 'select',
+            options: ['Not attempted','Jump but no rotation','Half-turn but stumbling','Clean both feet'] },
+        ]
+      },
+
+      // ── Pre-Bronze Test Readiness ─────────────────────────────
+      {
+        title: '📝 Pre-Bronze Test Readiness', fullWidth: false,
+        fields: [
+          { key: 'testStroking',   label: 'Test element: Forward stroking',                type: 'select',
+            options: ['Not run','Needs work','Nearly ready','Test ready'] },
+          { key: 'testEdges',      label: 'Test element: Basic consecutive edges',         type: 'select',
+            options: ['Not run','Needs work','Nearly ready','Test ready'] },
+          { key: 'testCrossovers', label: 'Test element: Fwd & bwd crossovers figure-8s', type: 'select',
+            options: ['Not run','Needs work','Nearly ready','Test ready'] },
+          { key: 'testThreeTurns', label: 'Test element: Alternating forward 3-turns',    type: 'select',
+            options: ['Not run','Needs work','Nearly ready','Test ready'] },
+        ]
+      },
+
+      // ── Session Notes ─────────────────────────────────────────
+      {
+        title: '💬 Session Notes', fullWidth: true,
+        fields: [
+          { key: 'coachFeedback', label: 'Coach feedback (if applicable)',          type: 'textarea',
+            placeholder: 'e.g. Coach said to keep free foot closer to ankle on glides', fullWidth: true },
+          { key: 'notes',         label: 'Personal notes — breakthroughs, struggles, moments', type: 'textarea',
+            placeholder: 'e.g. First time the waltz jump felt like a real jump!', fullWidth: true },
+          { key: 'rating',        label: 'Overall session rating (1–10)',           type: 'range', min: 1, max: 10, default: 7 },
+        ]
+      },
+    ],
+
+    benchmarks: [
+      { key: 'oneFootGlideR', label: 'Best Glide — Right', unit: 'seconds',    color: '#8b5fbf' },
+      { key: 'oneFootGlideL', label: 'Best Glide — Left',  unit: 'seconds',    color: '#9e7ab8' },
+      { key: 'twoFootSpin',   label: 'Two-Foot Spin',       unit: 'revolutions', color: '#b89de0' },
+      { key: 'oneFootSpin',   label: 'One-Foot Spin',        unit: 'revolutions', color: '#c070a0' },
+      { key: 'uprightSpin',   label: 'Upright Spin',         unit: 'revolutions', color: '#c9a96e' },
+      { key: 'iceTime',       label: 'Longest Session',      unit: 'minutes',    color: '#a8d8ea' },
+    ],
+
+    charts: [
+      {
+        id: 'onice-glide', title: 'One-Foot Glide Progress', fields: [
+          { key: 'oneFootGlideR', label: 'Right foot (s)', color: '#8b5fbf' },
+          { key: 'oneFootGlideL', label: 'Left foot (s)',  color: '#b89de0' },
+        ]
+      },
+      {
+        id: 'onice-spins', title: 'Spin Revolutions Over Time', fields: [
+          { key: 'twoFootSpin',  label: 'Two-foot spin',   color: '#9e7ab8' },
+          { key: 'oneFootSpin',  label: 'One-foot spin',   color: '#c070a0' },
+          { key: 'uprightSpin',  label: 'Upright spin',    color: '#c9a96e' },
+        ]
+      },
+      {
+        id: 'onice-confidence', title: 'Confidence & Session Rating', fields: [
+          { key: 'confidence', label: 'Confidence (1–10)', color: '#8b5fbf' },
+          { key: 'rating',     label: 'Session rating',    color: '#c070a0' },
+        ]
+      },
+    ],
+
+    historyStats: [
+      { key: 'iceTime',       label: 'Ice time',      suffix: () => ' min' },
+      { key: 'oneFootGlideR', label: 'Glide R',       suffix: () => 's' },
+      { key: 'oneFootGlideL', label: 'Glide L',       suffix: () => 's' },
+      { key: 'twoFootSpin',   label: '2-ft spin',     suffix: () => ' rev' },
+      { key: 'oneFootSpin',   label: '1-ft spin',     suffix: () => ' rev' },
+      { key: 'uprightSpin',   label: 'Upright spin',  suffix: () => ' rev' },
+      { key: 'falls',         label: 'Falls',         suffix: () => '' },
+      { key: 'confidence',    label: 'Confidence',    suffix: () => '/10' },
+      { key: 'rating',        label: 'Rating',        suffix: () => '/10' },
+    ],
+
+    historySelectStats: [
+      'twoFootGlide', 'snowplowStop',
+      'fwdStroking', 'fwdCrossovers', 'foThreeTurn', 'fwdEdges',
+      'bwdCrossovers', 'hockeyStop', 'spiral', 'bunnyHop', 'fiThreeTurn',
+      'mohawk', 'waltzJump', 'combinationMove', 'movingThreeTurn', 'mazurka',
+      'testStroking', 'testEdges', 'testCrossovers', 'testThreeTurns',
+    ],
+
+    metaColorKeys: ['#8b5fbf', '#9e7ab8', '#b89de0', '#c070a0'],
+  },
+
+
   // ── NUTRITION TRACKER ───────────────────────────────────────
   {
     id: 'nutrition',
