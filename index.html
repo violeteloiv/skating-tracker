@@ -23,6 +23,9 @@
     <button class="page-tab-btn active" id="ptab-plan" onclick="showPage('plan')">
       <span class="page-tab-icon">⛸</span>Training Plan
     </button>
+    <button class="page-tab-btn" id="ptab-onice" onclick="showPage('onice')">
+      <span class="page-tab-icon">⛸</span>On-Ice Program
+    </button>
     <button class="page-tab-btn" id="ptab-tracker" onclick="showPage('tracker')">
       <span class="page-tab-icon">📊</span>Progress Tracker
     </button>
@@ -646,6 +649,519 @@
   </div>
 
   </div><!-- end #page-plan -->
+
+  <!-- ===== PAGE: ON-ICE PROGRAM ===== -->
+  <div class="page-section" id="page-onice">
+
+  <div class="overview">
+    <div class="overview-item">
+      <div class="overview-num">4</div>
+      <div class="overview-label">Phases</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-num">2–3</div>
+      <div class="overview-label">Sessions / Week</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-num">45–60</div>
+      <div class="overview-label">Min / Session</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-num" id="onice-basics-num">1–2</div>
+      <div class="overview-label">Basics Levels</div>
+    </div>
+  </div>
+
+  <div class="month-nav" id="onice-month-nav">
+    <button class="month-btn active" onclick="showOnIceMonth(1)" style="--accent-color: #8b5fbf">Phase 1</button>
+    <button class="month-btn" onclick="showOnIceMonth(2)" style="--accent-color: #9e7ab8">Phase 2</button>
+    <button class="month-btn" onclick="showOnIceMonth(3)" style="--accent-color: #b89de0">Phase 3</button>
+    <button class="month-btn" onclick="showOnIceMonth(4)" style="--accent-color: #c070a0">Phase 4</button>
+  </div>
+
+  <!-- ===== ON-ICE PHASE 1: BASICS 1–2 ===== -->
+  <div class="month-panel active" id="onice-1" style="--month-color: #8b5fbf; --month-gradient: linear-gradient(135deg, #4a90b8, #a8d8ea);">
+
+    <div class="month-header">
+      <div class="month-num-big">01</div>
+      <div class="month-info">
+        <div class="month-title">First Time on Ice</div>
+        <div class="month-theme">"Learn to stand, march, glide, and stop on blades"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Basic 1</span>
+          <span class="focus-tag">Basic 2</span>
+          <span class="focus-tag">Standing & marching</span>
+          <span class="focus-tag">Swizzles & glides</span>
+          <span class="focus-tag">Snowplow stop</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          Your first sessions on ice should feel like a reunion with movements you've already practiced off-ice. Don't rush to "look like a skater" — every minute you spend getting comfortable at low speed pays dividends later. Use the boards freely. Falling is normal and expected; your off-ice work means you'll recover faster than a skater who came in cold.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">🛼</div>
+      <div class="equip-text">
+        <h4>Gear for This Phase</h4>
+        <p>Rental skates are fine to start. Make sure the boot is laced firmly all the way to the top — floppy ankles in a poorly laced boot is the most common cause of wobbling for new skaters. Wear thin socks, not thick ones. Helmet strongly recommended. Wrist guards optional but useful.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Session Structure — Use for every on-ice session this phase (2–3 sessions per week ideal)</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Part 1 — Getting On & Standing (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Step 1</div><div class="day-content"><strong>Step onto the ice holding the boards.</strong> Stand still. Feel the blade under your foot. Notice that the blade wants to slide — resist it by slightly gripping the ice with your ankles. Take 30 seconds just to feel this.</div></div>
+          <div class="day-row"><div class="day-label">Step 2</div><div class="day-content"><strong>March in place at the boards.</strong> Lift each foot 2 inches, set it down. This is Basic 1's first element — on ice it feels different because each footfall slides slightly. March 20 steps.</div></div>
+          <div class="day-row"><div class="day-label">Step 3</div><div class="day-content"><strong>March forward along the boards,</strong> one hand lightly touching. 3 lengths. Your off-ice march prepared you for this — trust that your knees are already bent correctly.</div></div>
+          <div class="day-row"><div class="day-label">Step 4</div><div class="day-content"><strong>Two-foot glide.</strong> March 3 steps, then bring feet together and glide. Hold the glide until you stop. 5 repetitions. The glide will feel shorter than you expect — that's normal. It gets longer as you gain confidence and speed.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Part 2 — Basic 1 Elements (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Dip.</strong> While gliding on two feet, bend your knees deeply and rise back up. 6 dips while moving. You practiced this as a stationary exercise off-ice — now it happens on a moving glide. Keep your chest up.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Forward swizzles.</strong> Start from standstill: heels together, toes out. Push feet apart and squeeze back together. 6–8 in a row. You've done this in socks — on ice it's the same V-out, V-in motion, now with the blade actually gliding.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Backward wiggles.</strong> Feet parallel, wiggle hips side-to-side to propel yourself slowly backward. 6–8 wiggles. Stay close to the boards on your first attempts. Look over your shoulder briefly to check your path.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Snowplow stop.</strong> Push off into a two-foot glide, then turn toes in and push heels out to form a wedge and stop. 6 reps. Practice stopping before you skate faster — your confidence on ice is directly tied to knowing you can stop.</div></div>
+          <div class="day-row"><div class="day-label">Element 5</div><div class="day-content"><strong>Rocking horse.</strong> Step forward onto one foot, rock weight back onto the other in a rhythm. 3 reps each side. This should feel familiar — it's the same pattern you practiced in the off-ice Thursday session.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Part 3 — Basic 2 Elements (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Forward one-foot glides.</strong> Skate forward and lift one foot slightly off the ice, gliding on the other. Hold as long as you can, then switch. 6 each foot. This is the biggest step-up from Basic 1 — all your single-leg balance work pays off here.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Backward two-foot glide.</strong> Push off the boards, glide backward on two feet. 5 reps. Stay relaxed and keep knees bent — the tendency is to straighten up and lean back when going backward, which causes falls.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Backward swizzles.</strong> From backward two-foot glide: push feet apart, squeeze back together while moving backward. 6–8 in a row. The same V-motion as forward swizzles, now moving in reverse.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Two-foot turn forward to backward in place.</strong> Glide forward, come to near-stop, pivot on two feet to face backward, hold for 2 seconds. 6 reps. You've practiced this pivot on flat ground — on ice the blade can swivel more freely, which actually makes it easier.</div></div>
+          <div class="day-row"><div class="day-label">Element 5</div><div class="day-content"><strong>Moving snowplow stop.</strong> Skate forward with some speed, then apply the snowplow stop. The "moving" version requires committing to the wedge while actually gliding — more confident than the static version.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Part 4 — Free Practice & Cool-Down (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Free Skate</div><div class="day-content">Skate around the rink freely at your own pace. No specific elements — just move, glide, and enjoy being on the ice. This unstructured time is where the elements start to connect into actual skating.</div></div>
+          <div class="day-row"><div class="day-label">Review</div><div class="day-content">Before leaving the ice, pick the one element that felt hardest today. Skate it 3 more times with full focus. Ending a session by improving one specific thing builds momentum.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Step off the ice, remove skates, and spend 5 minutes stretching calves, hip flexors, and inner thighs. The boots compress your feet and ankles — releasing that immediately after skating is important for recovery.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Phase 1 On-Ice — What to Focus On</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">Knee Bend</div>
+        <div class="ex-sets">Always — every element</div>
+        <div class="ex-desc">The most common mistake for first-time skaters is straightening the knees. Bent knees lower your center of gravity, give you shock absorption, and make every element easier. If something feels wrong, the first fix is always "bend your knees more."</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Eyes Forward</div>
+        <div class="ex-sets">Always — never look at your feet</div>
+        <div class="ex-desc">Looking down at your blades tilts your body forward and causes falls. Your feet know what to do — trust the off-ice training. Keep your gaze on the boards ahead of you, at eye level.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">One-Foot Glide</div>
+        <div class="ex-sets">6 × each foot per session</div>
+        <div class="ex-desc">The one-foot glide is the gateway to all of Basic 2 and the foundation of everything after. Spend extra time here. Even holding it for 2–3 seconds is progress — each session it will get longer.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Snowplow Stop</div>
+        <div class="ex-sets">Practice every session</div>
+        <div class="ex-desc">You cannot skate confidently until you can stop reliably. Practice your snowplow stop at the beginning of every session, before doing anything else, so it becomes automatic. Knowing you can stop lets you skate faster.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Falling Safely</div>
+        <div class="ex-sets">Know before you need it</div>
+        <div class="ex-desc">When you feel yourself falling, bend your knees, crouch low, and fall to the side onto your hip and thigh — not backward onto your tailbone or forward onto your hands. Getting up: roll to your side, get on your hands and knees, step one foot up, push up.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">T-Position Start</div>
+        <div class="ex-sets">Use for every push-off</div>
+        <div class="ex-desc">Before every push from standing, place your feet in a T-shape (one foot forward, one foot perpendicular behind it). Push off the back foot's inside edge. This is the correct way to start from a standstill and prevents the "penguin waddle" start.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Phase 1 On-Ice — Coaching Notes</div>
+      <ul class="tips-list">
+        <li>Your first session will feel nothing like what you practiced off-ice — and that's fine. The ice is a new sensory environment. Give yourself 2–3 sessions just to get comfortable before judging your progress.</li>
+        <li>Rental skates are often dull and poorly fitted. If you find yourself after 3–4 sessions and still feel like the blades are slipping sideways uncontrollably, ask the rink to sharpen the rentals you're using — it makes a dramatic difference.</li>
+        <li>The backward wiggle feels silly but is genuinely important — it's the only backward propulsion available to you at this stage. Don't skip it in favor of trying to look cooler.</li>
+        <li>Two-foot glide time is your best early metric. Note at the end of each session how long your best glide felt. When it starts lasting 3–4 seconds, you're ready to add Basic 3 elements.</li>
+        <li>If a rink near you offers a Basic Skills group lesson, even one or two sessions with an instructor will accelerate your progress significantly — especially for the one-foot glide and snowplow stop technique.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== ON-ICE PHASE 2: BASICS 3–4 ===== -->
+  <div class="month-panel" id="onice-2" style="--month-color: #9e7ab8; --month-gradient: linear-gradient(135deg, #6b5b9e, #a89bcc);">
+
+    <div class="month-header">
+      <div class="month-num-big">02</div>
+      <div class="month-info">
+        <div class="month-title">Stroking, Edges & Crossovers</div>
+        <div class="month-theme">"Start skating with real push, lean into your first edges, and cross your feet"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Basic 3</span>
+          <span class="focus-tag">Basic 4</span>
+          <span class="focus-tag">Forward stroking</span>
+          <span class="focus-tag">Edges on a circle</span>
+          <span class="focus-tag">Forward crossovers</span>
+          <span class="focus-tag">Forward outside 3-turn</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          This is where skating starts to feel like skating. Forward stroking, edges, and crossovers transform your movement from a careful shuffle into something fluid. The forward outside 3-turn is your first real turning skill. Your off-ice edge lean work and crossover walks have prepared your body — trust that foundation and focus on the ice feeling of each element.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">⛸</div>
+      <div class="equip-text">
+        <h4>Consider Your Own Skates</h4>
+        <p>By this phase, if you're skating 2–3 times per week, investing in your own skates is worthwhile. A properly fitted boot makes an enormous difference for edge work — you need to feel the blade tilt clearly through the boot. Entry-level figure skates ($80–$150) are far better than broken-down rentals.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Session Structure — 2–3 sessions per week; each session follows this arc</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Warm-Up Lap — Basics 1–2 Review (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Lap 1</div><div class="day-content">Easy forward skating around the rink — no pushing yet, just gliding on two feet, getting your bearings and warming up your ankles.</div></div>
+          <div class="day-row"><div class="day-label">Lap 2</div><div class="day-content">Forward one-foot glides — alternate feet every few seconds. Hold each glide a beat longer than feels comfortable. These should now feel significantly steadier than your Phase 1 first session.</div></div>
+          <div class="day-row"><div class="day-label">Lap 3</div><div class="day-content">Forward swizzles the full length of the rink — 6–8 in a row. Then backward swizzles back. Use this lap to get the blade feeling under your feet before adding new elements.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Basic 3 — Forward Stroking & Half-Swizzle Pumps (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Forward stroking with correct blade use.</strong> Push off one foot's inside edge, glide on the other foot, then push off that foot's inside edge. The push comes from the whole blade, not just the toe. Arms out, knees bent, chin up. 4 full laps of the rink.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Half-swizzle pumps on a circle.</strong> Skate a circle using one foot as the gliding foot — push off and pull back in with the other foot in a pumping action. 6–8 pumps clockwise, then counterclockwise. This is single-foot propulsion for the first time — the building block of stroking power.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Two-foot spin.</strong> Skate forward, step onto both feet on an inside edge circle, use your arms to wind up, then pull them in tight to spin. Up to 2 revolutions. Your off-ice two-foot spin simulation prepared you for the rotation — on ice the blades pivot on the ice more smoothly.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Forward slalom.</strong> Skate in a weaving S-curve pattern, shifting your weight from one outside edge to the other. This is edge-leaning in a flowing pattern — the most fun way to practice edge transitions early on.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Basic 4 — Edges & Crossovers (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Forward outside edge on a circle.</strong> Skate a circle on one foot, leaning outward (to the outside of the circle). The lean comes from your whole body, not just your hip. 4–6 half-circles each foot. The body position you practiced off-ice — this is it on a moving blade.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Forward inside edge on a circle.</strong> Same circle pattern but leaning inward (toward the center of the circle). 4–6 half-circles each foot. The inside edge lean feels more like leaning into a banked turn — commit to it rather than tipping cautiously.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Forward crossovers.</strong> On a circle, step the outside foot across and in front of the inside foot, then step the inside foot to the side. 4–8 crossovers per circle, two full figure-eights each direction. Your off-ice crossover walk gave you the foot pattern — now it happens on a leaning circle with momentum.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Forward outside 3-turn.</strong> Skate forward on an outside edge, then rotate your upper body in the direction of travel — the blade will "turn" on the ice from forward to backward. Hold the backward glide. 3 reps each foot. The pivot you practiced off-ice now has a real glide entry and exit.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Cool-Down & Backward Stroking Intro (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element</div><div class="day-content"><strong>Backward stroking.</strong> From a backward two-foot glide, push off one foot's outside edge and glide backward on the other. This is one of Basic 4's elements — the backward version of the forward push. 3 lengths. The push comes from the outside edge, which feels counterintuitive at first.</div></div>
+          <div class="day-row"><div class="day-label">Element</div><div class="day-content"><strong>Backward snowplow stop.</strong> While skating backward, push one heel outward to slow down. 6 reps, alternating feet. Basic 4's backward stop — essential for feeling safe skating backward before adding speed.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Easy skating lap around the rink at low speed. Off ice: 5 min stretch — calves, hip flexors, inner thighs. Note one specific improvement from last session and one thing to work on next time.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Phase 2 On-Ice — What to Focus On</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">The Push, Not the Step</div>
+        <div class="ex-sets">Every stroking lap</div>
+        <div class="ex-desc">New skaters often step sideways rather than pushing off a real edge. The push in forward stroking comes from the inside edge of the whole blade extending out to the side — not from pushing the toe back. Feel the difference.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Whole-Body Edge Lean</div>
+        <div class="ex-sets">All edge circle work</div>
+        <div class="ex-desc">When you practiced edge leans off-ice, the instruction was to lean the whole body — not just tilt the hip. On ice, this is even more important. If only your hip tilts, the blade flattens. The whole body leans as one unit over the blade.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Crossover: Cross In Front</div>
+        <div class="ex-sets">All crossover figure-eights</div>
+        <div class="ex-desc">The outside foot must cross genuinely in front of the inside foot — not just step beside it. If you're not crossing far enough, the crossover produces no power. You practiced this on a floor line off-ice — visualize that line on the ice surface.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">3-Turn: Lead With the Upper Body</div>
+        <div class="ex-sets">All 3-turn practice</div>
+        <div class="ex-desc">The forward outside 3-turn is initiated by rotating the upper body and shoulders in the direction of travel — the blade follows the body's rotation. If you try to turn the feet first, the turn feels forced. Lead with the chest, let the feet turn under you.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Free Foot Position</div>
+        <div class="ex-sets">Glides and edges</div>
+        <div class="ex-desc">During single-foot glides and edges, the free foot (the lifted one) should be held close to the skating ankle — not dangling out or swinging. A controlled free foot makes every edge cleaner and is one of the first things judges look for.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">T-Stop Introduction</div>
+        <div class="ex-sets">Practice each session</div>
+        <div class="ex-desc">Basic 4 includes no explicit stop, but the T-stop (introduced in Basic 6) is worth introducing early. Drag one foot behind you perpendicular to your skating direction — the blade's flat side creates friction. A second stopping tool gives you more confidence at higher speeds.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Phase 2 On-Ice — Coaching Notes</div>
+      <ul class="tips-list">
+        <li>Forward stroking is the most important skill to develop cleanly in this phase. Every other element — edges, crossovers, spins, jumps — is built on top of good stroking technique. Spend at least one full lap on stroking at the start of every session.</li>
+        <li>The 3-turn on ice will likely feel much easier than the off-ice pivot simulation, because the blade can actually swivel. The hard part is holding the backward glide after the turn without stepping out of it — practice the hold.</li>
+        <li>For crossovers, skate slower than you think you need to. At low speed the foot pattern is clearer and easier to correct. Speed without technique just bakes bad habits in faster.</li>
+        <li>If you haven't started lessons yet, this phase is the most important time to do so. A coach watching your edge work live can identify a lean or weight-distribution problem in seconds that might take you months to self-diagnose.</li>
+        <li>After each session, log your session notes in the Progress Tracker. Which elements felt better than last time? Which still feel uncertain? This reflection accelerates learning.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== ON-ICE PHASE 3: BASICS 5–6 ===== -->
+  <div class="month-panel" id="onice-3" style="--month-color: #b89de0; --month-gradient: linear-gradient(135deg, #3a9e7a, #7acfb5);">
+
+    <div class="month-header">
+      <div class="month-num-big">03</div>
+      <div class="month-info">
+        <div class="month-title">Backward Edges & First Jumps</div>
+        <div class="month-theme">"Add backward crossovers, the one-foot spin, and your first jump on the ice"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Basic 5</span>
+          <span class="focus-tag">Basic 6</span>
+          <span class="focus-tag">Backward crossovers</span>
+          <span class="focus-tag">One-foot spin</span>
+          <span class="focus-tag">Bunny hop</span>
+          <span class="focus-tag">Spiral</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          Basic 5 and 6 are the phases that make skating feel like figure skating. You add backward crossovers, your first on-ice spin, a hockey stop, and your very first jumps — the bunny hop, the lunge, and the spiral. Every one of these has a direct off-ice equivalent you've been training. The ice is where that preparation pays off.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">🎿</div>
+      <div class="equip-text">
+        <h4>Skate Sharpening</h4>
+        <p>By this phase, if you have your own skates, get them sharpened before starting. Dull blades make backward edges and the one-foot spin feel much harder than they should — the blade should bite the ice cleanly when you apply pressure to an edge. Most pro shops sharpen for $10–$20.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Session Structure — 2–3 sessions per week; warm up with Basics 3–4 before adding new elements</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Warm-Up — Basics 3–4 Review (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Lap 1–2</div><div class="day-content">Forward stroking — two full laps with real push and glide. These should now feel natural and rhythmic. Focus on the extension of the pushing foot at the end of each stroke.</div></div>
+          <div class="day-row"><div class="day-label">Lap 3</div><div class="day-content">Crossover figure-eights — one full figure-eight each direction. Warm up the hip abductors and the lean pattern before attempting backward elements.</div></div>
+          <div class="day-row"><div class="day-label">Lap 4</div><div class="day-content">One forward outside 3-turn each foot, then one forward inside 3-turn each foot. Review all four turns before moving on.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Basic 5 — Backward Edges & Crossovers (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Backward outside edge on a circle.</strong> From a backward two-foot glide, lean outward to place weight on one foot's outside edge. Glide the circle. 4–6 half-circles each foot. The body leans away from the circle's center — same lean you practiced in the off-ice backward edge hold.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Backward inside edge on a circle.</strong> Lean inward (toward the circle's center) on the backward glide. 4–6 half-circles each foot. Backward inside edges are the platform for future jump landings — establishing them cleanly now pays dividends later.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Backward crossovers.</strong> On a circle, cross one foot behind the other (the opposite of forward crossovers — behind, not in front) and push with the front foot's outside edge. 4–8 crossovers per circle, two figure-eights each direction. Your off-ice backward crossover walk prepared this foot pattern.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Hockey stop.</strong> Skate forward with confidence, then rotate both feet 90° sideways simultaneously while bending deeply — both blades scrape to stop. 6 reps. Commit to the rotation — a half-hearted hockey stop catches an edge and causes a fall.</div></div>
+          <div class="day-row"><div class="day-label">Element 5</div><div class="day-content"><strong>Side toe hops.</strong> Hop sideways from one foot to the other landing on the toe pick first, then flat. 8 hops each direction. Basic 5's toe hop — your first use of the toe pick on ice.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Basic 6 — Turns, First Jumps & Spiral (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Forward inside 3-turn.</strong> Enter on a forward inside edge, rotate 180° to backward. 3 reps each foot. The entry edge is different from the outside version — lean inward before initiating the turn, not outward.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Bunny hop.</strong> Skate forward, step onto the toe pick of one foot, spring into the air, land on the same toe pick, roll to flat. 5 reps each foot. This is your first jump on ice. The off-ice version prepared the landing mechanics — just add the toe-pick spring.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Forward lunge.</strong> Skate forward, step deep into a lunge with one leg extended forward near the ice, hold while gliding, rise back up. 4 each leg. The blade of the lunging foot stays flat on the ice — you're gliding on it while the back knee approaches the ice.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Forward spiral on a straight line.</strong> Skate forward on one foot and lift the free leg behind you as high as possible while gliding in a straight line. Hold for the length of the ice. 3 each foot. Your off-ice spiral hold built the back and hip strength — now you hold that position while balancing on a moving blade.</div></div>
+          <div class="day-row"><div class="day-label">Element 5</div><div class="day-content"><strong>T-stop.</strong> Drag one foot behind you perpendicular to your skating direction — the blade creates friction to slow you. 6 reps each foot. Basic 6's introduced stop — a more versatile tool than the snowplow at higher speeds.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Beginning One-Foot Spin (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Step 1</div><div class="day-content"><strong>Two-foot spin review.</strong> 3 two-foot spins as a warm-up before attempting one-foot. Get your rotation feeling and your center of balance warmed up.</div></div>
+          <div class="day-row"><div class="day-label">Step 2</div><div class="day-content"><strong>One-foot spin from two-foot.</strong> Begin a two-foot spin, then lift the free foot into the spin position. Hold for up to 3 revolutions. Lifting the free foot during a spin is the core challenge of Basic 5 — your off-ice spin balance drills prepared exactly this moment.</div></div>
+          <div class="day-row"><div class="day-label">Step 3</div><div class="day-content"><strong>Spin entry practice.</strong> Practice the forward inside Mohawk entry into a spin (the standard entry path): left forward outside edge → right forward inside Mohawk → left backward inside edge → step to right forward inside edge → spin. Don't rush the entry — a good spin comes from a controlled entry, not a fast one.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Easy laps, then off ice: calves, hips, and spine stretch. Spins put rotational stress on the spine — take the cool-down seriously.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Phase 3 On-Ice — What to Focus On</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">Backward Crossover Direction</div>
+        <div class="ex-sets">Behind, not in front</div>
+        <div class="ex-desc">The most common confusion with backward crossovers: the crossing foot goes behind the other foot (not in front, as in forward crossovers). The push comes from the front foot's outside edge. If your crossovers feel stiff, this distinction is usually why.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Hockey Stop: Commit</div>
+        <div class="ex-sets">Every stop practice</div>
+        <div class="ex-desc">A half-committed hockey stop is more dangerous than a full one — if you only partially rotate your feet, one blade catches a forward edge and you fall. Commit fully to the rotation. Trust the blades to scrape.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Bunny Hop Landing</div>
+        <div class="ex-sets">Every repetition</div>
+        <div class="ex-desc">Land on the toe pick, then roll to flat. The "roll to flat" is what makes this a skating jump rather than just a hop — it teaches the blade landing sequence used in all future jumps. Slow down and feel the toe-then-flat contact.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Spiral Free Leg Height</div>
+        <div class="ex-sets">Every spiral attempt</div>
+        <div class="ex-desc">For the Basic 6 test, the free leg in the spiral must be at or above hip height. This is where your off-ice spiral hold height directly translates. If it's below hip height on ice, increase the off-ice spiral hold work in your training.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Spin: Stay Over the Blade</div>
+        <div class="ex-sets">All spin attempts</div>
+        <div class="ex-desc">The most common spin problem is "traveling" — moving across the ice rather than spinning in one spot. This happens when your weight drifts off the blade's spin point (the ball of the foot). Think about pressing down through the ball of the foot throughout the spin.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Forward Inside 3-Turn Exit</div>
+        <div class="ex-sets">Each 3-turn attempt</div>
+        <div class="ex-desc">After the forward inside 3-turn, you exit on a backward outside edge. Holding that exit edge — not stepping out of it — is what distinguishes a clean 3-turn from a scrambled one. Hold the exit for 2 full counts before moving on.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Phase 3 On-Ice — Coaching Notes</div>
+      <ul class="tips-list">
+        <li>Backward crossovers feel awkward for almost everyone at first. The hardest part is trusting the push from the front foot's outside edge — it feels like pushing in the wrong direction. Slow down, exaggerate the push, and let the momentum build gradually.</li>
+        <li>For the spiral, skate faster before lifting the free leg — more speed gives you more time to hold the position before the blade slows. At very slow speeds, the spiral is actually harder to hold.</li>
+        <li>The one-foot spin is one of the skills where a single lesson with a qualified instructor is worth many hours of self-directed practice. Spin technique has nuances — entry edge, centering point, arm pull — that are very difficult to self-diagnose.</li>
+        <li>If the hockey stop is proving difficult, make sure you're starting the rotation while you still have adequate speed. Trying to hockey stop from a very slow speed is actually harder because there's not enough momentum to carry the rotation through.</li>
+        <li>This phase is a natural milestone to schedule a test prep session or informal review with a Basic Skills instructor. You're getting close to the Basic 5–6 test standard.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== ON-ICE PHASE 4: BASICS 7–8 ===== -->
+  <div class="month-panel" id="onice-4" style="--month-color: #c070a0; --month-gradient: linear-gradient(135deg, #c05050, #e08080);">
+
+    <div class="month-header">
+      <div class="month-num-big">04</div>
+      <div class="month-info">
+        <div class="month-title">Mohawks, Waltz Jump & Combination</div>
+        <div class="month-theme">"Complete the Basic Skills sequence and prepare for your Pre-Bronze test"</div>
+        <div class="month-focus">
+          <span class="focus-tag">Basic 7</span>
+          <span class="focus-tag">Basic 8</span>
+          <span class="focus-tag">Mohawk</span>
+          <span class="focus-tag">Waltz jump</span>
+          <span class="focus-tag">One-foot spin</span>
+          <span class="focus-tag">Combination move</span>
+        </div>
+        <br>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; font-family:'DM Mono',monospace; line-height:1.6;">
+          The final phase. Basic 7 and 8 introduce the Mohawk (a two-foot turn between edges), the waltz jump (your first rotational jump), the one-foot upright spin, and the Basic 8 combination move. All of these have been rehearsed extensively off-ice. On the ice, the goal is clean, confident execution — and by the end of this phase, you're ready to register for your Adult Pre-Bronze Skating Skills test.
+        </p>
+      </div>
+    </div>
+
+    <div class="equipment-box">
+      <div class="equip-icon">🏆</div>
+      <div class="equip-text">
+        <h4>Test Readiness</h4>
+        <p>By the end of this phase, you'll be preparing to test. Reach out to your home club's test chair to find upcoming test sessions in the Pacific Coast section. You'll need your Adult Pre-Bronze Skating Skills elements to be clean and consistent — not perfect, but repeatable. Begin "running through" all four test elements in sequence at the end of each session.</p>
+      </div>
+    </div>
+
+    <div class="weeks-label">Session Structure — 2–3 sessions per week; end every session with a full run-through of all test elements</div>
+
+    <div class="week-grid">
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Warm-Up — Basics 5–6 Review (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Lap 1–2</div><div class="day-content">Forward stroking → crossovers both directions → one forward 3-turn each foot. This warm-up sequence covers the Phase 2 foundation that everything in Phase 4 builds on.</div></div>
+          <div class="day-row"><div class="day-label">Lap 3</div><div class="day-content">Backward crossovers both directions → spiral each foot → landing position hold each foot. Warm up the Phase 3 elements before adding the new Phase 4 work on top.</div></div>
+          <div class="day-row"><div class="day-label">Spin Warm-Up</div><div class="day-content">Two-foot spin × 2, then one-foot spin attempts × 3. The spin should be the most warmed-up element in the session — centration and rotation feel improve as the session progresses.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Basic 7 — Mohawk & Backward Transitions (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Forward inside open Mohawk.</strong> Skate forward on a right forward inside edge, bring the left foot beside it turned out 90°, transfer weight to the left foot as your hips rotate to backward, glide out on a left backward outside edge. 4 reps R→L and 4 reps L→R. This is the Mohawk — your off-ice weight transfer drill is exactly this, now on moving blades.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Backward outside edge → forward outside edge transition.</strong> Skate backward on a right backward outside edge, step through (or Mohawk-step) onto a right forward outside edge. 4 each side. This is Basic 7's backward-to-forward edge transition — the building block of back-to-forward connections used in programs.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>Backward crossovers to backward outside edge glide (landing position).</strong> Do 3–4 backward crossovers on a circle, then step onto a single backward outside edge and hold the landing position — free leg extended forward, arms out. 4 reps each direction. This is the exact exit position of every back-outside-edge jump landing.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Forward inside pivot.</strong> Place the toe pick of one foot into the ice, pivot around it on the toe. 5 reps each foot. Basic 7's pivot — use the toe pick as an anchor point and keep your other foot close in, circling around the fixed point.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Basic 8 — Waltz Jump, Spins & Combination Move (15 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Waltz jump.</strong> Step onto a left forward outside edge, swing the right leg and left arm forward, take off from the left toe pick, rotate a half-turn in the air, land on the right backward outside edge in landing position. 5 reps. Your off-ice waltz jump simulation had all the pieces — on ice the takeoff has a toe-assist and the rotation is a true half-turn.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Mazurka.</strong> Step onto one foot, kick the free leg forward-upward, hop off the toe pick, land on the kicking foot's toe pick then roll to flat. 5 each foot. The mazurka is a distinctive jump — it looks and feels like a pointed-toe skip with a half-turn built in.</div></div>
+          <div class="day-row"><div class="day-label">Element 3</div><div class="day-content"><strong>One-foot upright spin with optional entry.</strong> Enter in whatever way feels most controlled, hold the spin for 3+ revolutions on one foot. This is the Basic 8 spin standard — multiple revolutions, centered, controlled exit. Your off-ice spin balance drills built the centering — now focus on pulling the arms in tight to accelerate.</div></div>
+          <div class="day-row"><div class="day-label">Element 4</div><div class="day-content"><strong>Basic 8 combination move.</strong> 2 forward crossovers → forward inside Mohawk → cross behind step → 1 backward crossover → step to forward inside edge. Run this full sequence 4 times each direction. This is the most complex element in the Basic Skills program — it tests your ability to chain everything you've learned.</div></div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header"><div class="week-dot"></div><div class="week-title">Moving 3-Turns & Pre-Bronze Test Prep (10 min)</div></div>
+        <div class="week-body">
+          <div class="day-row"><div class="day-label">Element 1</div><div class="day-content"><strong>Moving forward outside 3-turn on a circle.</strong> Rather than entering from a standstill, enter from a real glide on the circle. 4 reps each foot. Basic 8 requires the 3-turn from a moving edge — the entry edge quality matters much more than when starting from a standstill.</div></div>
+          <div class="day-row"><div class="day-label">Element 2</div><div class="day-content"><strong>Moving forward inside 3-turn on a circle.</strong> Same, entering from a forward inside edge glide. 4 reps each foot. Both moving 3-turns in one session — compare how the two entry edges feel and which is more controlled.</div></div>
+          <div class="day-row"><div class="day-label">Test Run-Through</div><div class="day-content"><strong>Pre-Bronze Skating Skills run-through.</strong> Perform all four required test elements in sequence as if it were a real test: forward stroking, basic consecutive edges, forward and backward crossovers, alternating forward 3-turns. Do this at the end of every session from now on. Consistency under mild pressure is the goal — not perfection in isolation.</div></div>
+          <div class="day-row"><div class="day-label">Cool-Down</div><div class="day-content">Easy laps, then off ice: full body stretch. Reflect on which test element feels least consistent — that becomes the focus of off-ice work this week.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Phase 4 On-Ice — What You've Built</div>
+    <div class="exercise-grid">
+      <div class="exercise-card">
+        <div class="ex-name">The Mohawk</div>
+        <div class="ex-sets">Basic 7 — both directions</div>
+        <div class="ex-desc">A two-foot turn between a forward inside edge and a backward outside edge. Your off-ice Mohawk walk gave you the weight transfer and hip rotation — on ice, commit to the entry edge and let the exit edge glide out fully. It's a transition, not a step.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Waltz Jump</div>
+        <div class="ex-sets">Basic 8 — both directions</div>
+        <div class="ex-desc">Your first real jump. The half-rotation happens naturally if the takeoff edge is clean — the body's momentum does the rotation. Focus on the landing: right backward outside edge, knee bent, free leg back, held for a full 2-count before stepping out.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">One-Foot Upright Spin</div>
+        <div class="ex-sets">Basic 8 — 3+ revolutions</div>
+        <div class="ex-desc">The upright spin requires centering over the blade's spin point and pulling the arms in to accelerate. Four months of off-ice spin balance work means your body knows the position — now it's about finding and holding your center of rotation on the blade.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Combination Move</div>
+        <div class="ex-sets">Basic 8 — both directions</div>
+        <div class="ex-desc">The combination move is not just six skills — it's a test of flow and connection. The transitions between each element should be seamless. Slow the whole sequence down until every transition is clean, then gradually bring the speed up.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Pre-Bronze Test Elements</div>
+        <div class="ex-sets">All four — run daily</div>
+        <div class="ex-desc">The four Adult Pre-Bronze Skating Skills elements (forward stroking, basic consecutive edges, forward and backward crossovers, alternating 3-turns) are now all within your skill set. Running them in sequence every session builds the consistency judges look for.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-name">Skating Quality</div>
+        <div class="ex-sets">Every element, every session</div>
+        <div class="ex-desc">At the Pre-Bronze test level, judges look for good skating quality as much as technical execution — clean edges, free foot control, upright posture, and quiet arms. These are exactly what all four phases of off-ice training have been building. Let it show.</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <div class="tips-title">Phase 4 On-Ice — Final Coaching Notes</div>
+      <ul class="tips-list">
+        <li>The waltz jump will feel like a big deal the first time it works cleanly — and it should. You've been building toward it for months. When it clicks, you'll feel the takeoff, rotation, and landing as one connected motion rather than three separate things.</li>
+        <li>The combination move is best practiced slowly. Most people rush it to get through the difficulty. Skate it at half speed with full attention to each transition — speed without control doesn't satisfy a test judge.</li>
+        <li>For the Pre-Bronze Skating Skills test specifically: the judges are evaluating your stroking technique, your edge quality on the consecutive edges pattern, your crossover lean and crossing depth, and your 3-turn control. Log specific feedback on each of these four elements after every test run-through.</li>
+        <li>Don't wait until everything feels perfect to register for a test session. The act of preparing for a test — knowing a date is coming — accelerates consistency in a way that open-ended practice doesn't. A slightly imperfect test attempt is more valuable than indefinitely waiting for perfect.</li>
+        <li>Once you pass your Adult Pre-Bronze Skating Skills test, the Adult Pre-Bronze Singles (Free Skate) test is your next milestone — and the first time you'll skate a program to music. Everything you've built across all four phases of this program feeds directly into that. You're ready.</li>
+      </ul>
+    </div>
+  </div>
+
+  </div><!-- end #page-onice -->
 
   <!-- ===== PAGE: PROGRESS TRACKER ===== -->
   <div class="page-section" id="page-tracker">
