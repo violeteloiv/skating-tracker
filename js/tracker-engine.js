@@ -3,7 +3,246 @@
    Don't edit this file to add trackers — edit tracker-config.js
    ============================================================ */
 
-const APP_VERSION = 'v2.3.0';
+const APP_VERSION = 'v2.4.0';
+
+// ── Workout Intensity Engine ──────────────────────────────────
+//
+// Targets are based on what the training plan PRESCRIBES for each
+// day of the week in a given phase — not on what was actually logged.
+// This means nutrition targets are always populated even before you
+// log a session for the day.
+//
+// MET (Metabolic Equivalent of Task) sources:
+//   Compendium of Physical Activities, Ainsworth et al. 2011
+//   Figure skating MET: ~7.0 (recreational-to-vigorous, ACSM)
+
+// ── Prescribed schedule per phase ────────────────────────────
+// Keys are JS getDay() values: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+// Each entry: { met, label, type, durationMins }
+const PHASE_SCHEDULE = {
+  // Phase 1 — Basics 1–2: Foundation. Gentle strength, flexibility, balance.
+  1: {
+    1: { met: 4.5, label: 'Lower body & balance',  type: 'strength',    durationMins: 45 }, // Mon
+    2: { met: 4.0, label: 'Core & posture',         type: 'strength',    durationMins: 45 }, // Tue
+    3: { met: 3.0, label: 'Flexibility & mobility', type: 'flexibility', durationMins: 40 }, // Wed
+    4: { met: 3.5, label: 'Arms & posture',         type: 'strength',    durationMins: 40 }, // Thu
+    5: { met: 4.5, label: 'Full-body simulation',   type: 'cardio',      durationMins: 45 }, // Fri
+    6: { met: 1.3, label: 'Rest / light walk',      type: 'rest',        durationMins: 0  }, // Sat
+    0: { met: 1.3, label: 'Rest',                   type: 'rest',        durationMins: 0  }, // Sun
+  },
+  // Phase 2 — Basics 3–4: Build. Single-leg strength, edge work, cardio added.
+  2: {
+    1: { met: 5.0, label: 'Single-leg strength',    type: 'strength',    durationMins: 50 },
+    2: { met: 4.5, label: 'Core stability',         type: 'strength',    durationMins: 45 },
+    3: { met: 3.5, label: 'Deep flexibility',       type: 'flexibility', durationMins: 40 },
+    4: { met: 4.0, label: 'Upper body & arms',      type: 'strength',    durationMins: 45 },
+    5: { met: 5.5, label: 'Jump prep & power',      type: 'cardio',      durationMins: 50 },
+    6: { met: 1.3, label: 'Rest / active recovery', type: 'rest',        durationMins: 0  },
+    0: { met: 1.3, label: 'Rest',                   type: 'rest',        durationMins: 0  },
+  },
+  // Phase 3 — Basics 5–6: Power. Plyometrics, 25-min cardio, intensity rises.
+  3: {
+    1: { met: 5.5, label: 'Lower body power',       type: 'strength',    durationMins: 55 },
+    2: { met: 5.0, label: 'Core power & rotation',  type: 'strength',    durationMins: 50 },
+    3: { met: 6.0, label: 'Cardio & endurance',     type: 'cardio',      durationMins: 55 }, // cardio day
+    4: { met: 4.5, label: 'Upper body & posture',   type: 'strength',    durationMins: 50 },
+    5: { met: 5.5, label: 'Skating elements',        type: 'cardio',      durationMins: 55 },
+    6: { met: 2.5, label: 'Light yoga / recovery',  type: 'flexibility', durationMins: 30 },
+    0: { met: 1.3, label: 'Rest',                   type: 'rest',        durationMins: 0  },
+  },
+  // Phase 4 — Basics 7–8: Performance. Peak intensity, mock programs.
+  4: {
+    1: { met: 6.0, label: 'Peak lower body',        type: 'strength',    durationMins: 60 },
+    2: { met: 5.5, label: 'Core mastery',           type: 'strength',    durationMins: 55 },
+    3: { met: 6.5, label: 'Cardio + mock program',  type: 'cardio',      durationMins: 65 },
+    4: { met: 5.0, label: 'Full upper body',        type: 'strength',    durationMins: 55 },
+    5: { met: 6.0, label: 'Skating readiness day',  type: 'cardio',      durationMins: 60 },
+    6: { met: 2.5, label: 'Active recovery / yoga', type: 'flexibility', durationMins: 30 },
+    0: { met: 1.3, label: 'Rest',                   type: 'rest',        durationMins: 0  },
+  },
+};
+
+// On-ice MET — recreational to vigorous figure skating
+const ICE_MET = 7.0;
+const ICE_SESSION_MINS = 50; // assumed average session length
+
+// How extra training calories are split across macros, by session type.
+// Strength → more protein; cardio/ice → more carbs; mixed → blended.
+const MACRO_SPLIT_BONUS = {
+  strength:    { proteinPct: 0.35, carbsPct: 0.45, fatsPct: 0.20 },
+  cardio:      { proteinPct: 0.20, carbsPct: 0.60, fatsPct: 0.20 },
+  flexibility: { proteinPct: 0.25, carbsPct: 0.55, fatsPct: 0.20 },
+  rest:        { proteinPct: 0.25, carbsPct: 0.50, fatsPct: 0.25 },
+  mixed:       { proteinPct: 0.28, carbsPct: 0.52, fatsPct: 0.20 },
+};
+
+/**
+ * getPrescribedDayBurn(dateStr, weightKg, trainingPhase, onIceDays)
+ *
+ * Looks at the day-of-week for dateStr and returns what the training
+ * plan prescribes for that day in the given phase.
+ *
+ * onIceDays: number of on-ice sessions per week (0–4). Sessions are
+ * distributed across Mon/Wed/Fri so they slot naturally around the
+ * off-ice schedule without doubling up on rest days.
+ *
+ * Returns { extraCals, sessionSummary[], dominantType }
+ */
+function getPrescribedDayBurn(dateStr, weightKg, trainingPhase, onIceDays) {
+  const phaseNum = parseInt((trainingPhase || '').match(/\d+/)?.[0] || '0');
+  const schedule = PHASE_SCHEDULE[phaseNum];
+
+  const date   = new Date(dateStr + 'T12:00:00');
+  const dow    = date.getDay(); // 0=Sun … 6=Sat
+
+  let extraCals = 0;
+  const sessionSummary = [];
+  const types = [];
+
+  // ── Off-ice prescribed session ────────────────────────────
+  if (schedule) {
+    const session = schedule[dow];
+    if (session && session.type !== 'rest' && session.durationMins > 0) {
+      const hours  = session.durationMins / 60;
+      const burned = Math.round(session.met * weightKg * hours);
+      extraCals += burned;
+      types.push(session.type);
+      sessionSummary.push({
+        icon:   session.type === 'strength' ? '🏋️' : session.type === 'cardio' ? '🏃' : '🧘',
+        label:  session.label,
+        mins:   session.durationMins,
+        burned,
+        source: 'off-ice plan',
+      });
+    }
+  }
+
+  // ── On-ice sessions ───────────────────────────────────────
+  // Distribute sessions evenly across Mon (1), Wed (3), Fri (5), and Thu (4) if 4+.
+  // This avoids adding ice sessions on rest days or doubling up awkwardly.
+  const iceDayCount = parseInt(onIceDays) || 0;
+  const iceDows = [1, 3, 5, 4].slice(0, iceDayCount); // Mon, Wed, Fri, Thu
+
+  if (iceDows.includes(dow)) {
+    const burned = Math.round(ICE_MET * weightKg * (ICE_SESSION_MINS / 60));
+    extraCals += burned;
+    types.push('cardio');
+    sessionSummary.push({
+      icon:   '⛸',
+      label:  'On-ice session',
+      mins:   ICE_SESSION_MINS,
+      burned,
+      source: 'on-ice plan',
+    });
+  }
+
+  // ── Dominant type ─────────────────────────────────────────
+  let dominantType = 'rest';
+  if (types.length === 1) dominantType = types[0];
+  else if (types.length > 1) dominantType = 'mixed';
+
+  return { extraCals, sessionSummary, dominantType };
+}
+
+/**
+ * computeMacros(baseTDEE, extraCals, weightLbs, goal, dominantType)
+ * Distributes extra calories across macros using training-type ratios.
+ */
+function computeMacros(baseTDEE, extraCals, weightLbs, goal, dominantType) {
+  let baseCals, baseProtein, baseFats, baseCarbs;
+  if (goal === 'Lose weight') {
+    baseCals    = baseTDEE - 500;
+    baseProtein = Math.round(weightLbs * 1.0);
+    baseFats    = Math.round(weightLbs * 0.35);
+    baseCarbs   = Math.round((baseCals - (baseProtein * 4) - (baseFats * 9)) / 4);
+  } else if (goal === 'Gain muscle') {
+    baseCals    = baseTDEE + 300;
+    baseProtein = Math.round(weightLbs * 1.2);
+    baseFats    = Math.round(weightLbs * 0.40);
+    baseCarbs   = Math.round((baseCals - (baseProtein * 4) - (baseFats * 9)) / 4);
+  } else {
+    baseCals    = baseTDEE;
+    baseProtein = Math.round(weightLbs * 0.8);
+    baseFats    = Math.round(weightLbs * 0.35);
+    baseCarbs   = Math.round((baseCals - (baseProtein * 4) - (baseFats * 9)) / 4);
+  }
+
+  if (extraCals <= 0) {
+    return { targetCals: Math.round(baseCals), protein: baseProtein, carbs: baseCarbs, fats: baseFats };
+  }
+
+  const split = MACRO_SPLIT_BONUS[dominantType] || MACRO_SPLIT_BONUS.mixed;
+  return {
+    targetCals: Math.round(baseCals + extraCals),
+    protein:    baseProtein + Math.round((extraCals * split.proteinPct) / 4),
+    carbs:      baseCarbs   + Math.round((extraCals * split.carbsPct)   / 4),
+    fats:       baseFats    + Math.round((extraCals * split.fatsPct)    / 9),
+  };
+}
+
+/**
+ * getBaseNutritionData()
+ * Reads settings + most recent weight, returns BMR/TDEE.
+ * Returns null if required data is missing.
+ */
+function getBaseNutritionData() {
+  const nutritionConfig = TRACKER_CONFIGS.find(t => t.id === 'nutrition');
+  if (!nutritionConfig) return null;
+  const stored = localStorage.getItem(`${nutritionConfig.storageKey}_settings`);
+  if (!stored) return null;
+  const s = JSON.parse(stored);
+  if (!s.age || !s.sex || !s.heightFt || !s.goal) return null;
+
+  let recentWeight = null;
+  TRACKER_CONFIGS.forEach(tracker => {
+    if (recentWeight) return;
+    const found = getEntries(tracker).find(e => e.weight && parseFloat(e.weight) > 0);
+    if (found) recentWeight = found;
+  });
+  if (!recentWeight) return null;
+
+  const weightLbs = recentWeight.weightUnit === 'kg'
+    ? parseFloat(recentWeight.weight) * 2.20462
+    : parseFloat(recentWeight.weight);
+  const weightKg  = weightLbs / 2.20462;
+  const heightIn  = (parseInt(s.heightFt) * 12) + parseInt(s.heightIn || 0);
+  const heightCm  = heightIn * 2.54;
+
+  // Mifflin-St Jeor BMR
+  const bmr = s.sex === 'Male'
+    ? (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) + 5
+    : (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) - 161;
+
+  // Base TDEE uses a moderate multiplier (1.375 — lightly active baseline).
+  // The engine adds training-specific calories on top per day, so we don't
+  // want the TDEE multiplier to already be "very active" — that would double-count.
+  const baseTDEE = bmr * 1.375;
+
+  return { s, weightLbs, weightKg, bmr, baseTDEE };
+}
+
+/**
+ * getNutritionTargets(dateStr?)
+ * Returns day-specific { targetCals, protein, carbs, fats, extraCals, sessionSummary, dominantType }.
+ * Uses prescribed plan schedule, not logged data.
+ */
+function getNutritionTargets(dateStr) {
+  const base = getBaseNutritionData();
+  if (!base) return null;
+  const { s, weightLbs, weightKg, baseTDEE } = base;
+
+  let extraCals = 0, sessionSummary = [], dominantType = 'rest';
+  if (dateStr) {
+    const burn   = getPrescribedDayBurn(dateStr, weightKg, s.trainingPhase, parseInt(s.onIceDays) || 0);
+    extraCals      = burn.extraCals;
+    sessionSummary = burn.sessionSummary;
+    dominantType   = burn.dominantType;
+  }
+
+  const macros = computeMacros(baseTDEE, extraCals, weightLbs, s.goal, dominantType);
+  return { ...macros, extraCals, sessionSummary, dominantType };
+}
+
 
 let activeTrackerIdx = 0;
 
@@ -262,67 +501,27 @@ function fmtDate(str) {
   return new Date(str + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 }
 
-// Get nutrition targets for color coding in history
-function getNutritionTargets() {
-  const nutritionConfig = TRACKER_CONFIGS.find(t => t.id === 'nutrition');
-  if (!nutritionConfig) return null;
+/**
+ * getNutritionTargets(dateStr?)
+ * Returns { targetCals, protein, carbs, fats, extraCals, sessionSummary, dominantType }
+ * If dateStr is provided, targets are adjusted for that day's actual logged workouts.
+ * If omitted, returns base TDEE targets (used for the Settings page baseline).
+ */
+function getNutritionTargets(dateStr) {
+  const base = getBaseNutritionData();
+  if (!base) return null;
+  const { s, weightLbs, weightKg, baseTDEE } = base;
 
-  const stored = localStorage.getItem(`${nutritionConfig.storageKey}_settings`);
-  if (!stored) return null;
-
-  const s = JSON.parse(stored);
-  if (!s.age || !s.sex || !s.heightFt || !s.activityLevel || !s.goal) return null;
-
-  // Get weight from any tracker
-  let recentWeight = null;
-  TRACKER_CONFIGS.forEach(tracker => {
-    if (recentWeight) return;
-    const entries = getEntries(tracker);
-    const found = entries.find(e => e.weight && parseFloat(e.weight) > 0);
-    if (found) recentWeight = found;
-  });
-
-  if (!recentWeight) return null;
-
-  const weightLbs = recentWeight.weightUnit === 'kg' ? recentWeight.weight * 2.20462 : parseFloat(recentWeight.weight);
-  const heightIn = (parseInt(s.heightFt) * 12) + parseInt(s.heightIn || 0);
-
-  // Calculate BMR and TDEE
-  const weightKg = weightLbs / 2.20462;
-  const heightCm = heightIn * 2.54;
-  const bmr = s.sex === 'Male'
-    ? (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) + 5
-    : (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) - 161;
-
-  const activityMultipliers = {
-    'Sedentary (little/no exercise)': 1.2,
-    'Lightly active (1-3 days/week)': 1.375,
-    'Moderately active (3-5 days/week)': 1.55,
-    'Very active (6-7 days/week)': 1.725,
-    'Extremely active (athlete)': 1.9
-  };
-
-  const tdee = bmr * (activityMultipliers[s.activityLevel] || 1.55);
-
-  let targetCals, protein, carbs, fats;
-  if (s.goal === 'Lose weight') {
-    targetCals = tdee - 500;
-    protein = Math.round(weightLbs * 1.0);
-    fats = Math.round(weightLbs * 0.35);
-    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
-  } else if (s.goal === 'Gain muscle') {
-    targetCals = tdee + 300;
-    protein = Math.round(weightLbs * 1.2);
-    fats = Math.round(weightLbs * 0.4);
-    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
-  } else {
-    targetCals = tdee;
-    protein = Math.round(weightLbs * 0.8);
-    fats = Math.round(weightLbs * 0.35);
-    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  let extraCals = 0, sessionSummary = [], dominantType = 'rest';
+  if (dateStr) {
+    const burn   = getPrescribedDayBurn(dateStr, weightKg, s.trainingPhase, parseInt(s.onIceDays) || 0);
+    extraCals      = burn.extraCals;
+    sessionSummary = burn.sessionSummary;
+    dominantType   = burn.dominantType;
   }
 
-  return { targetCals, protein, carbs, fats };
+  const macros = computeMacros(baseTDEE, extraCals, weightLbs, s.goal, dominantType);
+  return { ...macros, extraCals, sessionSummary, dominantType };
 }
 
 // ── Render history ────────────────────────────────────────────
@@ -338,9 +537,6 @@ function renderHistory() {
 
   // For nutrition tracker: group by day and show daily totals + individual entries
   if (cfg.id === 'nutrition') {
-    // Get targets for color coding
-    const targets = getNutritionTargets();
-
     const byDate = {};
     entries.forEach(e => {
       const dateKey = e.date;
@@ -349,43 +545,53 @@ function renderHistory() {
     });
 
     list.innerHTML = Object.entries(byDate).map(([date, dayEntries]) => {
-      // Calculate daily totals
+      // Get workout-adjusted targets FOR THIS SPECIFIC DATE
+      const targets = getNutritionTargets(date);
+
+      // Calculate daily food totals
       const totals = {
         calories: dayEntries.reduce((sum, e) => sum + (parseFloat(e.calories) || 0), 0),
-        protein: dayEntries.reduce((sum, e) => sum + (parseFloat(e.protein) || 0), 0),
-        carbs: dayEntries.reduce((sum, e) => sum + (parseFloat(e.carbs) || 0), 0),
-        fats: dayEntries.reduce((sum, e) => sum + (parseFloat(e.fats) || 0), 0),
-        water: dayEntries.reduce((sum, e) => sum + (parseFloat(e.water) || 0), 0),
+        protein:  dayEntries.reduce((sum, e) => sum + (parseFloat(e.protein)  || 0), 0),
+        carbs:    dayEntries.reduce((sum, e) => sum + (parseFloat(e.carbs)    || 0), 0),
+        fats:     dayEntries.reduce((sum, e) => sum + (parseFloat(e.fats)     || 0), 0),
+        water:    dayEntries.reduce((sum, e) => sum + (parseFloat(e.water)    || 0), 0),
       };
-      const waterUnit = dayEntries.find(e => e.waterUnit)?.waterUnit || 'oz';
 
       const color = '#8b5fbf';
 
-      // Helper function to get color and percentage
+      // Workout activity pills for this day
+      const activityPills = targets?.sessionSummary?.length
+        ? targets.sessionSummary.map(s =>
+            `<div style="
+              display:inline-flex;align-items:center;gap:5px;
+              font-family:'DM Mono',monospace;font-size:10px;
+              background:rgba(168,216,234,0.08);border:1px solid rgba(168,216,234,0.2);
+              color:#a8d8ea;padding:3px 9px;border-radius:3px;">
+              ${s.icon} ${s.label} · ${s.mins} min · +${s.burned} cal
+            </div>`).join('')
+        : `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);
+              background:rgba(184,157,224,0.04);border:1px solid rgba(184,157,224,0.1);
+              padding:3px 9px;border-radius:3px;display:inline-block;">
+              😴 Rest day — base targets
+           </div>`;
+
+      // Macro display box with % of day-specific target
       const getMacroDisplay = (actual, target, label) => {
         if (!targets || !target) {
-          return `
+          return `<div style="padding:8px;background:rgba(17,34,64,0.4);border-radius:6px;">
             <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;line-height:1;">${Math.round(actual)}</div>
-            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">${label}</div>`;
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);">${label}</div>
+          </div>`;
         }
-
         const pct = Math.round((actual / target) * 100);
         let displayColor, bgColor, borderColor;
-
         if (pct >= 90 && pct <= 110) {
-          displayColor = '#3a9e7a';
-          bgColor = 'rgba(58,158,122,0.12)';
-          borderColor = 'rgba(58,158,122,0.3)';
+          displayColor = '#3a9e7a'; bgColor = 'rgba(58,158,122,0.12)'; borderColor = 'rgba(58,158,122,0.3)';
         } else if (pct >= 70 && pct <= 130) {
-          displayColor = '#c9a96e';
-          bgColor = 'rgba(201,169,110,0.12)';
-          borderColor = 'rgba(201,169,110,0.3)';
+          displayColor = '#c9a96e'; bgColor = 'rgba(201,169,110,0.12)'; borderColor = 'rgba(201,169,110,0.3)';
         } else {
-          displayColor = '#c05050';
-          bgColor = 'rgba(192,80,80,0.12)';
-          borderColor = 'rgba(192,80,80,0.3)';
+          displayColor = '#c05050'; bgColor = 'rgba(192,80,80,0.12)'; borderColor = 'rgba(192,80,80,0.3)';
         }
-
         return `
           <div style="background:${bgColor};border:1px solid ${borderColor};border-radius:6px;padding:8px;">
             <div style="font-size:24px;font-family:'Bebas Neue',sans-serif;color:${displayColor};line-height:1;">${Math.round(actual)}</div>
@@ -401,16 +607,31 @@ function renderHistory() {
             <div class="history-entry-tag" style="color:${color};border-color:${color}40;">${dayEntries.length} meal${dayEntries.length > 1 ? 's' : ''}</div>
           </div>
         </div>
-        <div style="background:rgba(139,95,191,0.06);border-radius:6px;padding:16px;margin:12px 0;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:#8b5fbf;margin-bottom:10px;">Daily Totals</div>
+
+        <!-- Activity summary for the day -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+          ${activityPills}
+        </div>
+
+        <!-- Daily totals vs workout-adjusted targets -->
+        <div style="background:rgba(139,95,191,0.06);border-radius:6px;padding:16px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:#8b5fbf;">Daily Totals</div>
+            ${targets?.extraCals > 0
+              ? `<div style="font-family:'DM Mono',monospace;font-size:10px;color:#a8d8ea;">
+                   Target boosted +${targets.extraCals} cal for today's training
+                 </div>`
+              : ''}
+          </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;">
             ${getMacroDisplay(totals.calories, targets?.targetCals, 'CALORIES')}
-            ${getMacroDisplay(totals.protein, targets?.protein, 'PROTEIN')}
-            ${getMacroDisplay(totals.carbs, targets?.carbs, 'CARBS')}
-            ${getMacroDisplay(totals.fats, targets?.fats, 'FATS')}
+            ${getMacroDisplay(totals.protein,  targets?.protein,    'PROTEIN')}
+            ${getMacroDisplay(totals.carbs,    targets?.carbs,      'CARBS')}
+            ${getMacroDisplay(totals.fats,     targets?.fats,       'FATS')}
           </div>
           ${!targets ? `<div style="margin-top:12px;font-size:11px;color:var(--muted);font-style:italic;">💡 Set your targets in <strong>Settings</strong> tab to see color-coded progress!</div>` : ''}
         </div>
+
         <details style="margin-top:8px;">
           <summary style="cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:8px 0;">Show individual meals (${dayEntries.length})</summary>
           <div style="margin-top:12px;padding-left:12px;border-left:2px solid rgba(139,95,191,0.2);">
@@ -419,9 +640,9 @@ function renderHistory() {
                 <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete entry" style="top:8px;right:8px;">✕</button>
                 <div style="font-size:12px;color:var(--silver);margin-bottom:4px;">
                   ${e.calories ? `${e.calories} cal` : ''}
-                  ${e.protein ? ` · ${e.protein}g P` : ''}
-                  ${e.carbs ? ` · ${e.carbs}g C` : ''}
-                  ${e.fats ? ` · ${e.fats}g F` : ''}
+                  ${e.protein  ? ` · ${e.protein}g P`  : ''}
+                  ${e.carbs    ? ` · ${e.carbs}g C`    : ''}
+                  ${e.fats     ? ` · ${e.fats}g F`     : ''}
                 </div>
                 ${e.notes ? `<div style="font-size:12px;color:var(--muted);font-style:italic;">"${e.notes}"</div>` : ''}
               </div>
@@ -617,34 +838,24 @@ function renderMacroCalc() {
   const resultsEl = document.getElementById('macro-results');
   if (!resultsEl) return;
 
-  const stored = localStorage.getItem(`${cfg.storageKey}_settings`);
-  if (!stored) {
-    resultsEl.innerHTML = `
-      <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
-        Fill in your settings above and click Save to see macro recommendations.
-      </div>`;
-    return;
-  }
+  const base = getBaseNutritionData();
 
-  const s = JSON.parse(stored);
-  if (!s.age || !s.sex || !s.heightFt || !s.activityLevel || !s.goal) {
-    resultsEl.innerHTML = `
-      <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
-        Complete all fields above to calculate macros.
-      </div>`;
-    return;
-  }
+  if (!base) {
+    // Check if it's a settings issue or a weight issue
+    const nutritionConfig = TRACKER_CONFIGS.find(t => t.id === 'nutrition');
+    const stored = nutritionConfig ? localStorage.getItem(`${nutritionConfig.storageKey}_settings`) : null;
+    const s = stored ? JSON.parse(stored) : null;
+    const missingSettings = !s || !s.age || !s.sex || !s.heightFt || !s.goal;
 
-  // Get current weight from ANY tracker
-  let recentWeight = null;
-  TRACKER_CONFIGS.forEach(tracker => {
-    if (recentWeight) return;
-    const trackerEntries = getEntries(tracker);
-    const found = trackerEntries.find(e => e.weight && parseFloat(e.weight) > 0);
-    if (found) recentWeight = found;
-  });
+    if (missingSettings || !stored) {
+      resultsEl.innerHTML = `
+        <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
+          Fill in your settings above and click Save to see macro recommendations.
+        </div>`;
+      return;
+    }
 
-  if (!recentWeight) {
+    // Settings OK but no weight logged yet
     resultsEl.innerHTML = `
       <div style="text-align:center;color:var(--muted);font-style:italic;padding:40px 0;">
         <div style="font-size:16px;color:var(--frost);margin-bottom:12px;">⚠️ Weight Required</div>
@@ -661,88 +872,148 @@ function renderMacroCalc() {
     return;
   }
 
-  const weightLbs = recentWeight.weightUnit === 'kg' ? recentWeight.weight * 2.20462 : parseFloat(recentWeight.weight);
-  const heightIn = (parseInt(s.heightFt) * 12) + parseInt(s.heightIn || 0);
+  const { s, weightLbs, weightKg, bmr, baseTDEE } = base;
 
-  const weightKg = weightLbs / 2.20462;
-  const heightCm = heightIn * 2.54;
-  const bmr = s.sex === 'Male'
-    ? (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) + 5
-    : (10 * weightKg) + (6.25 * heightCm) - (5 * parseInt(s.age)) - 161;
+  // ── Base (rest-day) targets ────────────────────────────────
+  const baseMacros = computeMacros(baseTDEE, 0, weightLbs, s.goal, 'rest');
 
-  const activityMultipliers = {
-    'Sedentary (little/no exercise)': 1.2,
-    'Lightly active (1-3 days/week)': 1.375,
-    'Moderately active (3-5 days/week)': 1.55,
-    'Very active (6-7 days/week)': 1.725,
-    'Extremely active (athlete)': 1.9
-  };
+  // ── Today's workout-adjusted targets ──────────────────────
+  const todayStr    = new Date().toISOString().split('T')[0];
+  const todayBurn   = getPrescribedDayBurn(todayStr, weightKg, s.trainingPhase, parseInt(s.onIceDays) || 0);
+  const todayMacros = computeMacros(baseTDEE, todayBurn.extraCals, weightLbs, s.goal, todayBurn.dominantType);
 
-  const tdee = bmr * (activityMultipliers[s.activityLevel] || 1.55);
+  // ── Workout type label ─────────────────────────────────────
+  const typeLabels = { strength: '💪 Strength day', cardio: '🏃 Cardio day', flexibility: '🧘 Flexibility day', rest: '😴 Rest day', mixed: '⚡ Mixed training day' };
+  const todayTypeLabel = typeLabels[todayBurn.dominantType] || '😴 Rest day';
 
-  let targetCals, protein, carbs, fats;
-  if (s.goal === 'Lose weight') {
-    targetCals = tdee - 500;
-    protein = Math.round(weightLbs * 1.0);
-    fats = Math.round(weightLbs * 0.35);
-    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
-  } else if (s.goal === 'Gain muscle') {
-    targetCals = tdee + 300;
-    protein = Math.round(weightLbs * 1.2);
-    fats = Math.round(weightLbs * 0.4);
-    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
-  } else {
-    targetCals = tdee;
-    protein = Math.round(weightLbs * 0.8);
-    fats = Math.round(weightLbs * 0.35);
-    carbs = Math.round((targetCals - (protein * 4) - (fats * 9)) / 4);
+  // ── Day-by-day breakdown (last 7 days) ────────────────────
+  const last7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dStr    = d.toISOString().split('T')[0];
+    const burn    = getPrescribedDayBurn(dStr, weightKg, s.trainingPhase, parseInt(s.onIceDays) || 0);
+    const macros  = computeMacros(baseTDEE, burn.extraCals, weightLbs, s.goal, burn.dominantType);
+    const dayName = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    last7.push({ dStr, dayName, burn, macros, isToday: i === 0 });
   }
 
+  const macroBar = (macros) => `
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:#8b5fbf;">${macros.targetCals} cal</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:#c070a0;">${macros.protein}g P</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:#9e7ab8;">${macros.carbs}g C</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:#b89de0;">${macros.fats}g F</span>
+    </div>`;
+
   resultsEl.innerHTML = `
-    <div style="background:rgba(139,95,191,0.08);border:1px solid rgba(139,95,191,0.2);border-radius:8px;padding:24px;margin-bottom:16px;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#8b5fbf;margin-bottom:20px;text-align:center;">
-        🎯 Your Daily Macro Targets
+    <!-- TODAY'S TARGETS -->
+    <div style="background:rgba(139,95,191,0.08);border:1px solid rgba(139,95,191,0.3);border-radius:8px;padding:24px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#8b5fbf;">🎯 Today's Targets</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:#a8d8ea;background:rgba(168,216,234,0.08);border:1px solid rgba(168,216,234,0.2);padding:4px 12px;border-radius:3px;">${todayTypeLabel}</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
-        <div style="text-align:center;padding:24px;background:rgba(139,95,191,0.12);border-radius:6px;border:2px solid #8b5fbf;">
-          <div style="font-size:48px;font-family:'Bebas Neue',sans-serif;color:#8b5fbf;line-height:1;">${Math.round(targetCals)}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:1px;">CALORIES/DAY</div>
+
+      ${todayBurn.sessionSummary.length > 0 ? `
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+          ${todayBurn.sessionSummary.map(s =>
+            `<div style="font-family:'DM Mono',monospace;font-size:10px;color:#a8d8ea;background:rgba(168,216,234,0.06);border:1px solid rgba(168,216,234,0.15);padding:3px 10px;border-radius:3px;">
+              ${s.icon} ${s.label} · ${s.mins} min · +${s.burned} cal
+            </div>`).join('')}
+        </div>` : `
+        <div style="font-size:13px;color:var(--muted);font-style:italic;margin-bottom:16px;">
+          No workouts logged today — showing base targets. Log an off-ice or on-ice session to see today's adjusted targets.
+        </div>`}
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+        <div style="text-align:center;padding:20px;background:rgba(139,95,191,0.12);border-radius:6px;border:2px solid #8b5fbf;">
+          <div style="font-size:52px;font-family:'Bebas Neue',sans-serif;color:#8b5fbf;line-height:1;">${todayMacros.targetCals}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:1px;">CALORIES</div>
+          ${todayBurn.extraCals > 0 ? `<div style="font-family:'DM Mono',monospace;font-size:10px;color:#a8d8ea;margin-top:4px;">base + ${todayBurn.extraCals} training</div>` : ''}
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="padding:14px;background:rgba(192,112,160,0.12);border-radius:6px;border:1px solid rgba(192,112,160,0.3);display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="padding:12px;background:rgba(192,112,160,0.12);border-radius:6px;border:1px solid rgba(192,112,160,0.3);display:flex;justify-content:space-between;align-items:center;">
             <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">PROTEIN</div>
-            <div style="font-size:28px;font-family:'Bebas Neue',sans-serif;color:#c070a0;line-height:1;">${protein}g</div>
+            <div style="font-size:26px;font-family:'Bebas Neue',sans-serif;color:#c070a0;line-height:1;">${todayMacros.protein}g</div>
           </div>
-          <div style="padding:14px;background:rgba(158,122,184,0.12);border-radius:6px;border:1px solid rgba(158,122,184,0.3);display:flex;justify-content:space-between;align-items:center;">
+          <div style="padding:12px;background:rgba(158,122,184,0.12);border-radius:6px;border:1px solid rgba(158,122,184,0.3);display:flex;justify-content:space-between;align-items:center;">
             <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">CARBS</div>
-            <div style="font-size:28px;font-family:'Bebas Neue',sans-serif;color:#9e7ab8;line-height:1;">${carbs}g</div>
+            <div style="font-size:26px;font-family:'Bebas Neue',sans-serif;color:#9e7ab8;line-height:1;">${todayMacros.carbs}g</div>
           </div>
-          <div style="padding:14px;background:rgba(184,157,224,0.12);border-radius:6px;border:1px solid rgba(184,157,224,0.3);display:flex;justify-content:space-between;align-items:center;">
+          <div style="padding:12px;background:rgba(184,157,224,0.12);border-radius:6px;border:1px solid rgba(184,157,224,0.3);display:flex;justify-content:space-between;align-items:center;">
             <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">FATS</div>
-            <div style="font-size:28px;font-family:'Bebas Neue',sans-serif;color:#b89de0;line-height:1;">${fats}g</div>
+            <div style="font-size:26px;font-family:'Bebas Neue',sans-serif;color:#b89de0;line-height:1;">${todayMacros.fats}g</div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- 7-DAY CALENDAR VIEW -->
+    <div style="background:rgba(17,34,64,0.6);border:1px solid rgba(184,157,224,0.1);border-radius:8px;padding:20px;margin-bottom:20px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">📅 Last 7 Days — Adjusted Targets</div>
+      <div style="display:flex;flex-direction:column;gap:1px;">
+        ${last7.map(day => {
+          const hasWorkout = day.burn.sessionSummary.length > 0;
+          const isToday    = day.isToday;
+          const rowBg      = isToday ? 'rgba(139,95,191,0.10)' : 'rgba(17,34,64,0.3)';
+          const border     = isToday ? '1px solid rgba(139,95,191,0.35)' : '1px solid rgba(184,157,224,0.06)';
+          return `
+            <div style="display:grid;grid-template-columns:140px 1fr auto;gap:12px;align-items:center;
+                        padding:10px 14px;border-radius:5px;background:${rowBg};border:${border};">
+              <div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:${isToday ? '#a8d8ea' : 'var(--silver)'};">
+                  ${isToday ? '▶ Today' : day.dayName}
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                ${hasWorkout
+                  ? day.burn.sessionSummary.map(s =>
+                      `<span style="font-family:'DM Mono',monospace;font-size:9px;color:#a8d8ea;
+                                   background:rgba(168,216,234,0.07);border:1px solid rgba(168,216,234,0.15);
+                                   padding:2px 7px;border-radius:2px;">${s.icon} ${s.label} · ${s.mins}m</span>`).join('')
+                  : `<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">rest</span>`}
+              </div>
+              <div style="text-align:right;">
+                ${macroBar(day.macros)}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- BASE TARGETS (reference) -->
     <div class="tracker-card" style="background:rgba(17,34,64,0.4);">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">📊 Calculation Details</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">📊 Baseline (No Training Days)</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+        ${[
+          { label: 'CALORIES', val: baseMacros.targetCals, color: '#8b5fbf' },
+          { label: 'PROTEIN',  val: `${baseMacros.protein}g`,  color: '#c070a0' },
+          { label: 'CARBS',    val: `${baseMacros.carbs}g`,    color: '#9e7ab8' },
+          { label: 'FATS',     val: `${baseMacros.fats}g`,     color: '#b89de0' },
+        ].map(m => `
+          <div style="text-align:center;padding:12px;background:rgba(17,34,64,0.5);border-radius:5px;border:1px solid rgba(184,157,224,0.08);">
+            <div style="font-size:22px;font-family:'Bebas Neue',sans-serif;color:${m.color};">${m.val}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;">${m.label}</div>
+          </div>`).join('')}
+      </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
         <div>
           <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">BMR</div>
           <div style="font-size:20px;color:var(--silver);font-family:'Bebas Neue',sans-serif;">${Math.round(bmr)}</div>
         </div>
         <div>
-          <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">TDEE</div>
-          <div style="font-size:20px;color:var(--silver);font-family:'Bebas Neue',sans-serif;">${Math.round(tdee)}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">Base TDEE</div>
+          <div style="font-size:20px;color:var(--silver);font-family:'Bebas Neue',sans-serif;">${Math.round(baseTDEE)}</div>
         </div>
         <div>
           <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">Weight</div>
           <div style="font-size:20px;color:var(--silver);font-family:'Bebas Neue',sans-serif;">${Math.round(weightLbs)} lbs</div>
         </div>
       </div>
-      <div style="font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;border-top:1px solid rgba(184,157,224,0.1);padding-top:12px;">
-        💡 <strong>Tip:</strong> Log multiple meals/snacks per day and they'll automatically sum up in your daily totals. These targets are based on your goal to ${s.goal.toLowerCase()}. Track for 2-3 weeks and adjust based on results.
+      <div style="font-size:12px;color:var(--muted);font-style:italic;line-height:1.6;border-top:1px solid rgba(184,157,224,0.1);padding-top:12px;">
+        💡 Targets automatically adjust each day based on what the training plan prescribes for that day of the week in your current phase.
+        Strength days (Mon/Tue/Thu) boost protein; cardio and ice days (Wed/Fri + on-ice sessions) boost carbs.
+        Update your phase in Settings whenever you move to the next phase of the program.
       </div>
     </div>`;
 }
